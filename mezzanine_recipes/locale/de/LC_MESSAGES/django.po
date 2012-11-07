@@ -1,0 +1,523 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-11-09 18:01+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: fields.py:10
+msgid "simple"
+msgstr "einfach"
+
+#: fields.py:11
+msgid "medium"
+msgstr "mittel"
+
+#: fields.py:12
+msgid "difficult"
+msgstr "schwierig"
+
+#: fields.py:120
+msgid "cup"
+msgstr "Becher"
+
+#: fields.py:121
+msgid "bag"
+msgstr "Beutel"
+
+#: fields.py:122
+msgid "sheet"
+msgstr "Blatt"
+
+#: fields.py:123
+msgid "sheets"
+msgstr "Blätter"
+
+#: fields.py:124
+msgid "bunch"
+msgstr "Bund"
+
+#: fields.py:125
+msgid "bundle"
+msgstr "Bündel"
+
+#: fields.py:126
+msgid "cl"
+msgstr "cl"
+
+#: fields.py:127
+msgid "cm"
+msgstr "cm"
+
+#: fields.py:128
+msgid "thick"
+msgstr "dicke"
+
+#: fields.py:129
+msgid "dl"
+msgstr "dl"
+
+#: fields.py:130
+msgid "can"
+msgstr "Dose"
+
+#: fields.py:131
+msgid "cans"
+msgstr "Dosen/n"
+
+#: fields.py:132
+msgid "thin"
+msgstr "dünne"
+
+#: fields.py:133
+msgid "bucket"
+msgstr "Eimer"
+
+#: fields.py:134
+msgid "a few"
+msgstr "einige"
+
+#: fields.py:135
+msgid "a few stalks"
+msgstr "einige Stiele"
+
+#: fields.py:136
+msgid "tbs"
+msgstr "EL"
+
+#: fields.py:137
+msgid "level tbs."
+msgstr "EL, gest."
+
+#: fields.py:138
+msgid "something"
+msgstr "etwas"
+
+#: fields.py:139
+msgid "possibly"
+msgstr "evtl."
+
+#: fields.py:140
+msgid "extra"
+msgstr "extra"
+
+#: fields.py:141
+msgid "bottle"
+msgstr "Flasche"
+
+#: fields.py:142
+msgid "bottles"
+msgstr "Flaschen"
+
+#: fields.py:143
+msgid "g"
+msgstr "g"
+
+#: fields.py:144
+msgid "glass"
+msgstr "Glas"
+
+#: fields.py:145
+msgid "glasses"
+msgstr "Gläser"
+
+#: fields.py:146
+msgid "great can"
+msgstr "gr. Dose/n"
+
+#: fields.py:147
+msgid "great bottle"
+msgstr "gr. Fl."
+
+#: fields.py:148
+msgid "great she"
+msgstr "große"
+
+#: fields.py:149
+msgid "great"
+msgstr "großen"
+
+#: fields.py:150
+msgid "great he"
+msgstr "großer"
+
+#: fields.py:151
+msgid "great it"
+msgstr "großes"
+
+#: fields.py:152
+msgid "half"
+msgstr "halbe"
+
+#: fields.py:153
+msgid "handful"
+msgstr "Handvoll"
+
+#: fields.py:154
+msgid "kg"
+msgstr "kg"
+
+#: fields.py:155
+msgid "small bunch"
+msgstr "kl. Bund"
+
+#: fields.py:156
+msgid "small can"
+msgstr "kl. Dose/n"
+
+#: fields.py:157
+msgid "small glass"
+msgstr "kl. Glas"
+
+#: fields.py:158
+msgid "small head"
+msgstr "kl. Kopf"
+
+#: fields.py:159
+msgid "small bottle"
+msgstr "kl. Flasche/n"
+
+#: fields.py:160
+msgid "small she"
+msgstr "kleine"
+
+#: fields.py:161
+msgid "small"
+msgstr "kleinen"
+
+#: fields.py:162
+msgid "small he"
+msgstr "kleiner"
+
+#: fields.py:163
+msgid "small it"
+msgstr "kleines"
+
+#: fields.py:164
+msgid "tuber"
+msgstr "Knolle/n"
+
+#: fields.py:165
+msgid "head"
+msgstr "Kopf"
+
+#: fields.py:166
+msgid "ball"
+msgstr "Kugel"
+
+#: fields.py:167
+msgid "balls"
+msgstr "Kugel/n"
+
+#: fields.py:168
+msgid "some balls"
+msgstr "Kugeln"
+
+#: fields.py:169
+msgid "box"
+msgstr "Kästchen"
+
+#: fields.py:170
+msgid "heads"
+msgstr "Köpfe"
+
+#: fields.py:171
+msgid "corn"
+msgstr "Körner"
+
+#: fields.py:172
+msgid "liter"
+msgstr "Liter"
+
+#: fields.py:173
+msgid "medium she"
+msgstr "m.-große"
+
+#: fields.py:174
+msgid "medium he"
+msgstr "m.-großer"
+
+#: fields.py:175
+msgid "medium it"
+msgstr "m.-großes"
+
+#: fields.py:176
+msgid "more"
+msgstr "mehr"
+
+#: fields.py:177
+msgid "mg"
+msgstr "mg"
+
+#: fields.py:178
+msgid "ml"
+msgstr "ml"
+
+#: fields.py:179
+msgid "msp."
+msgstr "Msp."
+
+#: fields.py:180
+msgid "n. B."
+msgstr "n. B."
+
+#: fields.py:181
+msgid "pair"
+msgstr "Paar"
+
+#: fields.py:182
+msgid "package"
+msgstr "Paket"
+
+#: fields.py:183
+msgid "pck."
+msgstr "Pck."
+
+#: fields.py:184
+msgid "pkt."
+msgstr "Pkt."
+
+#: fields.py:185
+msgid "plate"
+msgstr "Platte/n"
+
+#: fields.py:186
+msgid "port."
+msgstr "Port."
+
+#: fields.py:187
+msgid "prise"
+msgstr "Prise"
+
+#: fields.py:188
+msgid "prises"
+msgstr "Prisen"
+
+#: fields.py:189
+msgid "ring"
+msgstr "Ring/e"
+
+#: fields.py:190
+msgid "rib"
+msgstr "Rippe/n"
+
+#: fields.py:191
+msgid "disc"
+msgstr "Scheibe"
+
+#: fields.py:192
+msgid "discs"
+msgstr "Scheiben"
+
+#: fields.py:193
+msgid "shot"
+msgstr "Schuss"
+
+#: fields.py:194
+msgid "tapenade"
+msgstr "Schälchen"
+
+#: fields.py:195
+msgid "splash"
+msgstr "Spritzer"
+
+#: fields.py:196
+msgid "rod"
+msgstr "Stange/n"
+
+#: fields.py:197
+msgid "stalk"
+msgstr "Stiel/e"
+
+#: fields.py:198
+msgid "stalks"
+msgstr "Stiele"
+
+#: fields.py:199
+msgid "piece"
+msgstr "Stück"
+
+#: fields.py:200
+msgid "culm"
+msgstr "Stängel"
+
+#: fields.py:201
+msgid "chalkboard"
+msgstr "Tafel"
+
+#: fields.py:202
+msgid "chalkboards"
+msgstr "Tafeln"
+
+#: fields.py:203
+msgid "cup2"
+msgstr "Tasse"
+
+#: fields.py:204
+msgid "cups"
+msgstr "Tasse/n"
+
+#: fields.py:205
+msgid "part"
+msgstr "Teil/e"
+
+#: fields.py:206
+msgid "tl."
+msgstr "TL"
+
+#: fields.py:207
+msgid "heaped tl."
+msgstr "TL, gehäuft"
+
+#: fields.py:208
+msgid "level tl."
+msgstr "TL, gestr."
+
+#: fields.py:209
+msgid "pot"
+msgstr "Topf"
+
+#: fields.py:210
+msgid "drop"
+msgstr "Tropfen"
+
+#: fields.py:211
+msgid "tube"
+msgstr "Tube/n"
+
+#: fields.py:212
+msgid "bag2"
+msgstr "Tüte/n"
+
+#: fields.py:213
+msgid "lots"
+msgstr "viel"
+
+#: fields.py:214
+msgid "few"
+msgstr "wenig"
+
+#: fields.py:215
+msgid "root"
+msgstr "Wurzel"
+
+#: fields.py:216
+msgid "roots"
+msgstr "Wurzel/n"
+
+#: fields.py:217
+msgid "cube"
+msgstr "Würfel/n"
+
+#: fields.py:218
+msgid "toe"
+msgstr "Zehe/n"
+
+#: fields.py:219
+msgid "brace"
+msgstr "Zweig/e"
+
+#: models.py:21
+msgid "Cover Image"
+msgstr "Abbildung"
+
+#: models.py:22
+msgid "Summary"
+msgstr "Kurzbeschreibung"
+
+#: models.py:23
+msgid "Portions"
+msgstr "Portionen"
+
+#: models.py:24
+msgid "Difficulty"
+msgstr "Schwierigkeit"
+
+#: models.py:25
+msgid "Source"
+msgstr "Quelle"
+
+#: models.py:25
+msgid "URL of the source recipe"
+msgstr "URL des Ursprung Rezeptes"
+
+#: models.py:26
+msgid "Categories"
+msgstr "Kategorien"
+
+#: models.py:27
+msgid "Allow comments"
+msgstr "Kommentare erlauben"
+
+#: models.py:33 models.py:58 models.py:88 models.py:100 models.py:112
+msgid "Recipe"
+msgstr "Rezept"
+
+#: models.py:34
+msgid "Recipes"
+msgstr "Rezepte"
+
+#: models.py:44
+msgid "Recipe Category"
+msgstr "Rezept Kategorie"
+
+#: models.py:45
+msgid "Recipe Categories"
+msgstr "Rezept Kategorien"
+
+#: models.py:59
+msgid "Quantity"
+msgstr "Menge"
+
+#: models.py:60
+msgid "Unit"
+msgstr "Einheit"
+
+#: models.py:61 models.py:67
+msgid "Ingredient"
+msgstr "Zutat"
+
+#: models.py:62
+msgid "Note"
+msgstr "Anmerkung"
+
+#: models.py:68
+msgid "Ingredients"
+msgstr "Zutaten"
+
+#: models.py:76
+msgid "hours"
+msgstr "Stunden"
+
+#: models.py:77
+msgid "minutes"
+msgstr "Minuten"
+
+#: models.py:91
+msgid "working hour"
+msgstr "Arbeitszeit"
+
+#: models.py:103
+msgid "cooking time"
+msgstr "Kochzeit"
+
+#: models.py:113
+msgid "days"
+msgstr "Tage"
+
+#: models.py:116
+msgid "rest period"
+msgstr "Ruhezeit"

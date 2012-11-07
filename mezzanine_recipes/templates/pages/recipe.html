@@ -1,0 +1,13 @@
+{% extends "pages/page.html" %}
+
+{% load mezzanine_tags pages_tags %}
+
+{% block main %}{{ block.super }}
+
+    <div class="hero-unit">
+    {% editable page.recipe.content %}
+        {{ page.recipe.content|richtext_filter|safe }}
+    {% endeditable %}
+    </div>
+
+{% endblock %}
