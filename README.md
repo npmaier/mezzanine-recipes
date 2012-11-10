@@ -5,8 +5,8 @@ This plugin gives you a "Recipe" page type for your Mezzanine sites.
 ## Features
 
 * Show your visitors what to cook
-	* Embed a image of the meal
-	* Provide a ingredient list
+	* Embed an image of the meal
+	* Provide an ingredient list
 * Let your visitors add a comment or rating to recipes
 * The usual stuff - ingredients, times, categories
 
