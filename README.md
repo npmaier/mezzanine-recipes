@@ -1,6 +1,6 @@
 # mezzanine-recipes
 
-This plugin gives you an "Recipe" page type for your Mezzanine sites.
+This plugin gives you a "Recipe" page type for your Mezzanine sites.
 
 ## Features
 
@@ -24,7 +24,7 @@ Create an Recipe page in the Mezzanine admin (naming it something like "Recipe")
 
 ## Creating Templates
 
-### Event pages
+### Recipe page
 
 The template for an Recipe page is `templates/pages/recipe.html`.
 
@@ -36,7 +36,7 @@ The Recipe object is available at `page.recipe`. It has the following properties
 
 ## To Do
 
-* Create a clean Recipe Template
+* Create a clean recipe template
 * Add a REST Service
 * Add some tests
 
