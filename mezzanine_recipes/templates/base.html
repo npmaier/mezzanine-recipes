@@ -1,5 +1,5 @@
 {% overextends "base.html" %}
 
-{% block extra_css %}
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/application.css">
+{% block extra_css %}{{ block.super }}
+    <link rel="stylesheet" href="{{ STATIC_URL }}css/mezzanine-recipe.css">
 {% endblock %}
