@@ -50,7 +50,7 @@ class Ingredient(Orderable):
     it searchable.
     """
 
-    recipe = models.ForeignKey("Recipe", verbose_name=_("Recipe"))
+    recipe = models.ForeignKey("Recipe", verbose_name=_("Recipe"), related_name="ingredients")
     quantity = models.CharField(_("Quantity"), max_length=10, blank=True, null=True)
     unit = models.IntegerField(_("Unit"), choices=fields.UNITS, blank=True, null=True)
     ingredient = models.CharField(_("Ingredient"), max_length=100)
@@ -67,7 +67,6 @@ class Period(models.Model):
     """
     Provides fields for a period of time
     """
-
     hours = models.IntegerField(_("hours"), default=0)
     minutes = models.IntegerField(_("minutes"), default=0)
 
@@ -79,8 +78,7 @@ class WorkingHours(Period):
     """
     Provides working hour fields for cooking a recipe
     """
-
-    recipe = models.OneToOneField("Recipe", verbose_name=_("Recipe"))
+    recipe = models.OneToOneField("Recipe", verbose_name=_("Recipe"), related_name="working_hours")
 
     class Meta:
         verbose_name = _("working hour")
@@ -91,8 +89,7 @@ class CookingTime(Period):
     """
     Provides cooking time fields for cooking a recipe
     """
-
-    recipe = models.OneToOneField("Recipe", verbose_name=_("Recipe"))
+    recipe = models.OneToOneField("Recipe", verbose_name=_("Recipe"), related_name="cooking_time")
 
     class Meta:
         verbose_name = _("cooking time")
@@ -103,8 +100,7 @@ class RestPeriod(Period):
     """
     Provides rest time fields for cooking a recipe
     """
-
-    recipe = models.OneToOneField("Recipe", verbose_name=_("Recipe"))
+    recipe = models.OneToOneField("Recipe", verbose_name=_("Recipe"), related_name="rest_period")
     days = models.IntegerField(_("days"), default=0)
 
     class Meta:
