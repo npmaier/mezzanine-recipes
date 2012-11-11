@@ -7,8 +7,9 @@ This plugin gives you a "Recipe" page type for your Mezzanine sites.
 * Show your visitors what to cook
 	* Embed an image of the meal
 	* Provide an ingredient list
-* Let your visitors add a comment or rating to recipes
+* Let your visitors add a comment to recipes
 * The usual stuff - ingredients, times, categories
+* REST-API for external applications
 
 ## Installation
 
@@ -37,7 +38,8 @@ The Recipe object is available at `page.recipe`. It has the following properties
 ## To Do
 
 * Create a clean recipe template
-* Add a REST Service
+* Let visitors add a rating to recipes
+* Extend the REST API for comment fields
 * Add some tests
 
 ## License
