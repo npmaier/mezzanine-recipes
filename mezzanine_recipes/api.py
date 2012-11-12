@@ -1,10 +1,15 @@
+from django.conf.urls.defaults import url
+from django.utils.translation import ugettext_lazy as _
+from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Q
+from django.http import Http404
 from mezzanine.core.models import CONTENT_STATUS_PUBLISHED
 from mezzanine.utils.timezone import now
 from tastypie import fields
 from tastypie.resources import ModelResource
 from tastypie.cache import SimpleCache
 from tastypie.throttle import CacheDBThrottle
+from tastypie.utils import trailing_slash
 from .models import Recipe, RecipeCategory, Ingredient, WorkingHours, CookingTime, RestPeriod
 from .fields import DIFFICULTIES, UNITS
 
@@ -29,23 +34,60 @@ class RecipeCategoryResource(ModelResource):
 
 
 class RecipeResource(ModelResource):
-    categories = fields.ToManyField('mezzanine_recipes.api.RecipeCategoryResource', 'categories')
-    ingredients = fields.ToManyField('mezzanine_recipes.api.IngredientResource', 'ingredients')
-    working_hours = fields.ToOneField('mezzanine_recipes.api.WorkingHoursResource', 'working_hours', null=WorkingHours)
-    cooking_time = fields.ToOneField('mezzanine_recipes.api.CookingTimeResource', 'cooking_time', null=CookingTime)
-    rest_period = fields.ToOneField('mezzanine_recipes.api.RestPeriodResource', 'rest_period', null=RestPeriod)
+    categories = fields.ToManyField('mezzanine_recipes.api.RecipeCategoryResource', 'categories', full=True)
+    ingredients = fields.ToManyField('mezzanine_recipes.api.IngredientResource', 'ingredients', full=True)
+    working_hours = fields.ToOneField('mezzanine_recipes.api.WorkingHoursResource', 'working_hours', full=True, null=True)
+    cooking_time = fields.ToOneField('mezzanine_recipes.api.CookingTimeResource', 'cooking_time', full=True, null=True)
+    rest_period = fields.ToOneField('mezzanine_recipes.api.RestPeriodResource', 'rest_period', full=True, null=True)
 
     class Meta:
-        queryset = Recipe.objects.published()
+        queryset = Recipe.objects.published().order_by('-publish_date')
         resource_name = "recipe"
-        fields = ['id', 'title', 'cover', 'summary', 'description', 'portions', 'difficulty',]
+        fields = ['id', 'title', 'cover', 'summary', 'description', 'portions', 'difficulty', 'publish_date',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
+        filtering = {
+            "publish_date": ('gt',),
+        }
 
     def dehydrate_difficulty(self, bundle):
         return dict(DIFFICULTIES)[bundle.data['difficulty']]
+
+    def override_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
+        ]
+
+    def get_search(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        #self.is_authenticated(request)
+        self.throttle_check(request)
+
+        # Do the query.
+        #sqs = SearchQuerySet().models(Recipe).load_all().auto_query(request.GET.get('q', ''))
+        sqs = Recipe.objects.search(request.GET.get('q', ''))
+        paginator = Paginator(sqs, 20)
+
+        try:
+            page = paginator.page(int(request.GET.get('page', 1)))
+        except InvalidPage:
+            raise Http404(_("Sorry, no results on that page."))
+
+        objects = []
+
+        for result in page.object_list:
+            bundle = self.build_bundle(obj=result, request=request)
+            bundle = self.full_dehydrate(bundle)
+            objects.append(bundle)
+
+        object_list = {
+            'objects': objects,
+        }
+
+        self.log_throttled_access(request)
+        return self.create_response(request, object_list)
 
 
 class IngredientResource(ModelResource):
@@ -54,7 +96,7 @@ class IngredientResource(ModelResource):
     class Meta:
         queryset = Ingredient.objects.all()
         resource_name = "ingredient"
-        fields = ['id', 'recipe', 'quantity', 'unit', 'ingredient', 'note',]
+        fields = ['id', 'quantity', 'unit', 'ingredient', 'note',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         limit = 0
@@ -76,7 +118,7 @@ class WorkingHoursResource(ModelResource):
     class Meta:
         queryset = WorkingHours.objects.all()
         resource_name = "working_hours"
-        fields = ['id', 'recipe', 'hours', 'minutes',]
+        fields = ['id', 'hours', 'minutes',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
@@ -94,7 +136,7 @@ class CookingTimeResource(ModelResource):
     class Meta:
         queryset = CookingTime.objects.all()
         resource_name = "cooking_time"
-        fields = ['id', 'recipe', 'hours', 'minutes',]
+        fields = ['id', 'hours', 'minutes',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
@@ -112,7 +154,7 @@ class RestPeriodResource(ModelResource):
     class Meta:
         queryset = RestPeriod.objects.all()
         resource_name = "rest_period"
-        fields = ['id', 'recipe', 'days', 'hours', 'minutes',]
+        fields = ['id', 'days', 'hours', 'minutes',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()

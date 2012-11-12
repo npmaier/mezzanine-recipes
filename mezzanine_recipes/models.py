@@ -14,7 +14,7 @@ class Recipe(Page, Ownable, RichText, AdminThumbMixin):
     """
 
     cover = FileField(verbose_name=_("Cover Image"), upload_to="rawfoodimages", format="Image", max_length=255, null=True, blank=True)
-    summary = models.CharField(_("Summary"), max_length=200, blank=True, null=True)
+    summary = models.TextField(_("Summary"), blank=True, null=True)
     portions = models.IntegerField(_("Portions"), blank=True, null=True)
     difficulty = models.IntegerField(_("Difficulty"), choices=fields.DIFFICULTIES, blank=True, null=True)
     source = models.URLField(_("Source"), blank=True, null=True, help_text=_("URL of the source recipe"))
@@ -22,12 +22,13 @@ class Recipe(Page, Ownable, RichText, AdminThumbMixin):
     allow_comments = models.BooleanField(verbose_name=_("Allow comments"), default=True)
     comments = CommentsField(verbose_name=_("Comments"))
 
-    admin_thumb_field = "featured_image"
+    admin_thumb_field = "cover"
+
+    search_fields = ("title", "summary", "description",)
 
     class Meta:
         verbose_name = _("Recipe")
         verbose_name_plural = _("Recipes")
-        ordering = ("-publish_date",)
 
 
 class RecipeCategory(Slugged):
@@ -55,8 +56,6 @@ class Ingredient(Orderable):
     unit = models.IntegerField(_("Unit"), choices=fields.UNITS, blank=True, null=True)
     ingredient = models.CharField(_("Ingredient"), max_length=100)
     note = models.CharField(_("Note"), max_length=200, blank=True, null=True)
-
-    search_fields = ("title",)
 
     class Meta:
         verbose_name = _("Ingredient")
