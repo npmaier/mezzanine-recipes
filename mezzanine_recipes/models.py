@@ -13,7 +13,7 @@ class Recipe(Page, Ownable, RichText, AdminThumbMixin):
     Implements the recipe type of page with all recipe fields.
     """
 
-    cover = FileField(verbose_name=_("Cover Image"), upload_to="rawfoodimages", format="Image", max_length=255, null=True, blank=True)
+    cover = FileField(_("Cover Image"), format="Image", max_length=255, null=True, blank=True)
     summary = models.TextField(_("Summary"), blank=True, null=True)
     portions = models.IntegerField(_("Portions"), blank=True, null=True)
     difficulty = models.IntegerField(_("Difficulty"), choices=fields.DIFFICULTIES, blank=True, null=True)
@@ -23,8 +23,10 @@ class Recipe(Page, Ownable, RichText, AdminThumbMixin):
     comments = CommentsField(verbose_name=_("Comments"))
 
     admin_thumb_field = "cover"
-
     search_fields = ("title", "summary", "description",)
+
+    def __unicode__(self):
+        return u'%s' % (self.title)
 
     class Meta:
         verbose_name = _("Recipe")
@@ -35,14 +37,16 @@ class RecipeCategory(Slugged):
     """
     A category for grouping blog posts into a series.
     """
+    @models.permalink
+    def get_absolute_url(self):
+        return ("recipe_post_list_category", (), {"slug": self.slug})
+
+    def __unicode__(self):
+        return u'%s' % (self.title)
 
     class Meta:
         verbose_name = _("Recipe Category")
         verbose_name_plural = _("Recipe Categories")
-
-    @models.permalink
-    def get_absolute_url(self):
-        return ("recipe_post_list_category", (), {"slug": self.slug})
 
 
 class Ingredient(Orderable):
@@ -56,6 +60,9 @@ class Ingredient(Orderable):
     unit = models.IntegerField(_("Unit"), choices=fields.UNITS, blank=True, null=True)
     ingredient = models.CharField(_("Ingredient"), max_length=100)
     note = models.CharField(_("Note"), max_length=200, blank=True, null=True)
+
+    def __unicode__(self):
+        return u'%s' % (self.ingredient)
 
     class Meta:
         verbose_name = _("Ingredient")
