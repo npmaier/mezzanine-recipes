@@ -17,20 +17,23 @@ This plugin gives you a "Recipe" page type for your Mezzanine sites.
 * Add `"mezzanine_recipes"` to your `INSTALLED_APPS`
 * Migrate your database
 * To enable REST API put following code to your urls.py:
-    from mezzanine_recipes.api import *
 
-    v1_api = Api(api_name='v1')
-    v1_api.register(RecipeCategoryResource())
-    v1_api.register(RecipeResource())
-    v1_api.register(IngredientResource())
-    v1_api.register(WorkingHoursResource())
-    v1_api.register(CookingTimeResource())
-    v1_api.register(RestPeriodResource())
-    v1_api.register(CommentResource())
+```python
+from mezzanine_recipes.api import *
 
-    urlpatterns = patterns("",
-        (r'^api/', include(v1_api.urls)),
-        ...  
+v1_api = Api(api_name='v1')
+v1_api.register(RecipeCategoryResource())
+v1_api.register(RecipeResource())
+v1_api.register(IngredientResource())
+v1_api.register(WorkingHoursResource())
+v1_api.register(CookingTimeResource())
+v1_api.register(RestPeriodResource())
+v1_api.register(CommentResource())
+
+urlpatterns = patterns("",
+    (r'^api/', include(v1_api.urls)),
+    ...
+```
 
 ## Usage
 
