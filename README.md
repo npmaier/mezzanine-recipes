@@ -19,6 +19,7 @@ This plugin gives you a "Recipe" page type for your Mezzanine sites.
 * To enable REST API put following code to your urls.py:
 
 ```python
+from tastypie.api import Api
 from mezzanine_recipes.api import *
 
 v1_api = Api(api_name='v1')
