@@ -16,6 +16,21 @@ This plugin gives you a "Recipe" page type for your Mezzanine sites.
 * Run `pip install https://github.com/tjetzinger/mezzanine-recipes/tarball/master` (or, if you want to hack on mezzanine-recipes, clone it and run `pip install -e path/to/repo`)
 * Add `"mezzanine_recipes"` to your `INSTALLED_APPS`
 * Migrate your database
+* To enable REST API put following code to your urls.py:
+    from mezzanine_recipes.api import *
+
+    v1_api = Api(api_name='v1')
+    v1_api.register(RecipeCategoryResource())
+    v1_api.register(RecipeResource())
+    v1_api.register(IngredientResource())
+    v1_api.register(WorkingHoursResource())
+    v1_api.register(CookingTimeResource())
+    v1_api.register(RestPeriodResource())
+    v1_api.register(CommentResource())
+
+    urlpatterns = patterns("",
+        (r'^api/', include(v1_api.urls)),
+        ...  
 
 ## Usage
 
@@ -37,9 +52,8 @@ The Recipe object is available at `page.recipe`. It has the following properties
 
 ## To Do
 
-* Create a clean recipe template
 * Let visitors add a rating to recipes
-* Extend the REST API for comment fields
+* Extend REST API to a PUT Method for CommentResource
 * Add some tests
 
 ## License

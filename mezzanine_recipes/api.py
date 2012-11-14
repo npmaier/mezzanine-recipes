@@ -3,6 +3,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Q
 from django.http import Http404
+from mezzanine.generic.models import ThreadedComment
 from mezzanine.core.models import CONTENT_STATUS_PUBLISHED
 from mezzanine.utils.timezone import now
 from tastypie import fields
@@ -31,6 +32,22 @@ class RecipeCategoryResource(ModelResource):
         return RecipeCategory.objects.filter(Q(recipes__publish_date__lte=now()) | Q(recipes__publish_date__isnull=True),
                                              Q(recipes__expiry_date__gte=now()) | Q(recipes__expiry_date__isnull=True),
                                              Q(recipes__status=CONTENT_STATUS_PUBLISHED)).distinct()
+
+
+
+class CommentResource(ModelResource):
+    class Meta:
+        queryset = ThreadedComment.objects.visible()
+        resource_name = "comments"
+        fields = ['id', 'comment', 'submit_date', 'user_name',]
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            'object_pk': ('exact',),
+        }
+
 
 
 class RecipeResource(ModelResource):
@@ -90,6 +107,7 @@ class RecipeResource(ModelResource):
         return self.create_response(request, object_list)
 
 
+
 class IngredientResource(ModelResource):
     recipe = fields.ToOneField('mezzanine_recipes.api.RecipeResource', 'recipe')
 
@@ -112,6 +130,7 @@ class IngredientResource(ModelResource):
         return dict(UNITS)[bundle.data['unit']]
 
 
+
 class WorkingHoursResource(ModelResource):
     recipe = fields.ToOneField('mezzanine_recipes.api.RecipeResource', 'recipe')
 
@@ -130,6 +149,7 @@ class WorkingHoursResource(ModelResource):
                                            Q(recipe__status=CONTENT_STATUS_PUBLISHED))
 
 
+
 class CookingTimeResource(ModelResource):
     recipe = fields.ToOneField('mezzanine_recipes.api.RecipeResource', 'recipe')
 
@@ -146,6 +166,7 @@ class CookingTimeResource(ModelResource):
         return CookingTime.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
                                           Q(recipe__expiry_date__gte=now()) | Q(recipe__expiry_date__isnull=True),
                                           Q(recipe__status=CONTENT_STATUS_PUBLISHED))
+
 
 
 class RestPeriodResource(ModelResource):
