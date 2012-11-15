@@ -1,12 +1,14 @@
 from copy import deepcopy
 from django.contrib import admin
-from mezzanine.pages.admin import PageAdmin
-from mezzanine.core.admin import TabularDynamicInlineAdmin, DisplayableAdmin, OwnableAdmin
-from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod, RecipeCategory
+
+from mezzanine.blog.admin import BlogPostAdmin
+from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin, TabularDynamicInlineAdmin
+
+from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod
 
 
-recipe_extra_fieldsets = ((None, {"fields": ("cover", "summary", "categories", "content", "portions", "difficulty", "source", "allow_comments",)}),)
-
+blogpost_fieldsets = deepcopy(BlogPostAdmin.fieldsets)
+blogpost_fieldsets[0][1]["fields"].extend(["summary", "portions", "difficulty", "source",])
 
 class WorkingHoursInline(admin.TabularInline):
     model = WorkingHours
@@ -21,15 +23,12 @@ class RestPeriodInline(admin.TabularInline):
 class IngredientInline(TabularDynamicInlineAdmin):
     model = Ingredient
 
-
-class RecipeAdmin(PageAdmin, OwnableAdmin):
+class RecipeAdmin(BlogPostAdmin):
     """
     Admin class for recipes.
     """
-
     inlines = (IngredientInline, WorkingHoursInline, CookingTimeInline, RestPeriodInline,)
-    fieldsets = deepcopy(PageAdmin.fieldsets) + recipe_extra_fieldsets
-    filter_horizontal = ("categories",)
+    fieldsets = blogpost_fieldsets
 
     def save_form(self, request, form, change):
         """
@@ -39,19 +38,4 @@ class RecipeAdmin(PageAdmin, OwnableAdmin):
         return DisplayableAdmin.save_form(self, request, form, change)
 
 
-class RecipeCategoryAdmin(admin.ModelAdmin):
-    """
-    Admin class for recipe categories. Hides itself from the admin menu
-    unless explicitly specified.
-    """
-
-    fieldsets = ((None, {"fields": ("title",)}),)
-
-    def in_menu(self):
-        """
-        Hide from the admin menu.
-        """
-        return False
-
 admin.site.register(Recipe, RecipeAdmin)
-admin.site.register(RecipeCategory, RecipeCategoryAdmin)

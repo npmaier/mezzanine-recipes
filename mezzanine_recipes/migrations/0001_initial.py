@@ -10,40 +10,19 @@ class Migration(SchemaMigration):
     def forwards(self, orm):
         # Adding model 'Recipe'
         db.create_table('mezzanine_recipes_recipe', (
-            ('page_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['pages.Page'], unique=True, primary_key=True)),
-            ('content', self.gf('mezzanine.core.fields.RichTextField')()),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='recipes', to=orm['auth.User'])),
-            ('cover', self.gf('mezzanine.core.fields.FileField')(max_length=255, null=True, blank=True)),
-            ('summary', self.gf('django.db.models.fields.CharField')(max_length=200, null=True, blank=True)),
+            ('blogpost_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['blog.BlogPost'], unique=True, primary_key=True)),
+            ('summary', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('portions', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('difficulty', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('source', self.gf('django.db.models.fields.URLField')(max_length=200, null=True, blank=True)),
-            ('allow_comments', self.gf('django.db.models.fields.BooleanField')(default=True)),
         ))
         db.send_create_signal('mezzanine_recipes', ['Recipe'])
-
-        # Adding M2M table for field categories on 'Recipe'
-        db.create_table('mezzanine_recipes_recipe_categories', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('recipe', models.ForeignKey(orm['mezzanine_recipes.recipe'], null=False)),
-            ('recipecategory', models.ForeignKey(orm['mezzanine_recipes.recipecategory'], null=False))
-        ))
-        db.create_unique('mezzanine_recipes_recipe_categories', ['recipe_id', 'recipecategory_id'])
-
-        # Adding model 'RecipeCategory'
-        db.create_table('mezzanine_recipes_recipecategory', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('site', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['sites.Site'])),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=500)),
-            ('slug', self.gf('django.db.models.fields.CharField')(max_length=2000, null=True, blank=True)),
-        ))
-        db.send_create_signal('mezzanine_recipes', ['RecipeCategory'])
 
         # Adding model 'Ingredient'
         db.create_table('mezzanine_recipes_ingredient', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('_order', self.gf('django.db.models.fields.IntegerField')(null=True)),
-            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['mezzanine_recipes.Recipe'])),
+            ('recipe', self.gf('django.db.models.fields.related.ForeignKey')(related_name='ingredients', to=orm['mezzanine_recipes.Recipe'])),
             ('quantity', self.gf('django.db.models.fields.CharField')(max_length=10, null=True, blank=True)),
             ('unit', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('ingredient', self.gf('django.db.models.fields.CharField')(max_length=100)),
@@ -56,7 +35,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('hours', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('minutes', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('recipe', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['mezzanine_recipes.Recipe'], unique=True)),
+            ('recipe', self.gf('django.db.models.fields.related.OneToOneField')(related_name='working_hours', unique=True, to=orm['mezzanine_recipes.Recipe'])),
         ))
         db.send_create_signal('mezzanine_recipes', ['WorkingHours'])
 
@@ -65,7 +44,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('hours', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('minutes', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('recipe', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['mezzanine_recipes.Recipe'], unique=True)),
+            ('recipe', self.gf('django.db.models.fields.related.OneToOneField')(related_name='cooking_time', unique=True, to=orm['mezzanine_recipes.Recipe'])),
         ))
         db.send_create_signal('mezzanine_recipes', ['CookingTime'])
 
@@ -74,7 +53,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('hours', self.gf('django.db.models.fields.IntegerField')(default=0)),
             ('minutes', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('recipe', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['mezzanine_recipes.Recipe'], unique=True)),
+            ('recipe', self.gf('django.db.models.fields.related.OneToOneField')(related_name='rest_period', unique=True, to=orm['mezzanine_recipes.Recipe'])),
             ('days', self.gf('django.db.models.fields.IntegerField')(default=0)),
         ))
         db.send_create_signal('mezzanine_recipes', ['RestPeriod'])
@@ -83,12 +62,6 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
         # Deleting model 'Recipe'
         db.delete_table('mezzanine_recipes_recipe')
-
-        # Removing M2M table for field categories on 'Recipe'
-        db.delete_table('mezzanine_recipes_recipe_categories')
-
-        # Deleting model 'RecipeCategory'
-        db.delete_table('mezzanine_recipes_recipecategory')
 
         # Deleting model 'Ingredient'
         db.delete_table('mezzanine_recipes_ingredient')
@@ -133,6 +106,55 @@ class Migration(SchemaMigration):
             'user_permissions': ('django.db.models.fields.related.ManyToManyField', [], {'to': "orm['auth.Permission']", 'symmetrical': 'False', 'blank': 'True'}),
             'username': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '30'})
         },
+        'blog.blogcategory': {
+            'Meta': {'object_name': 'BlogCategory'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
+            'slug': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '500'})
+        },
+        'blog.blogpost': {
+            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'BlogPost'},
+            '_meta_title': ('django.db.models.fields.CharField', [], {'max_length': '500', 'null': 'True', 'blank': 'True'}),
+            'allow_comments': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'categories': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'blogposts'", 'blank': 'True', 'to': "orm['blog.BlogCategory']"}),
+            'comments': ('mezzanine.generic.fields.CommentsField', [], {'object_id_field': "'object_pk'", 'to': "orm['generic.ThreadedComment']", 'frozen_by_south': 'True'}),
+            'comments_count': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'content': ('mezzanine.core.fields.RichTextField', [], {}),
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
+            'expiry_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'featured_image': ('mezzanine.core.fields.FileField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'gen_description': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'keywords': ('mezzanine.generic.fields.KeywordsField', [], {'object_id_field': "'object_pk'", 'to': "orm['generic.AssignedKeyword']", 'frozen_by_south': 'True'}),
+            'keywords_string': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
+            'publish_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
+            'rating': ('mezzanine.generic.fields.RatingField', [], {'object_id_field': "'object_pk'", 'to': "orm['generic.Rating']", 'frozen_by_south': 'True'}),
+            'rating_average': ('django.db.models.fields.FloatField', [], {'default': '0'}),
+            'rating_count': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'short_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
+            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
+            'slug': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
+            'status': ('django.db.models.fields.IntegerField', [], {'default': '2'}),
+            'title': ('django.db.models.fields.CharField', [], {'max_length': '500'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'blogposts'", 'to': "orm['auth.User']"})
+        },
+        'comments.comment': {
+            'Meta': {'ordering': "('submit_date',)", 'object_name': 'Comment', 'db_table': "'django_comments'"},
+            'comment': ('django.db.models.fields.TextField', [], {'max_length': '3000'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'content_type_set_for_comment'", 'to': "orm['contenttypes.ContentType']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'ip_address': ('django.db.models.fields.IPAddressField', [], {'max_length': '15', 'null': 'True', 'blank': 'True'}),
+            'is_public': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
+            'is_removed': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'object_pk': ('django.db.models.fields.TextField', [], {}),
+            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
+            'submit_date': ('django.db.models.fields.DateTimeField', [], {'default': 'None'}),
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'comment_comments'", 'null': 'True', 'to': "orm['auth.User']"}),
+            'user_email': ('django.db.models.fields.EmailField', [], {'max_length': '75', 'blank': 'True'}),
+            'user_name': ('django.db.models.fields.CharField', [], {'max_length': '50', 'blank': 'True'}),
+            'user_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'blank': 'True'})
+        },
         'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
             'app_label': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
@@ -155,12 +177,25 @@ class Migration(SchemaMigration):
             'slug': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '500'})
         },
+        'generic.rating': {
+            'Meta': {'object_name': 'Rating'},
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']"}),
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'object_pk': ('django.db.models.fields.IntegerField', [], {}),
+            'value': ('django.db.models.fields.IntegerField', [], {})
+        },
+        'generic.threadedcomment': {
+            'Meta': {'ordering': "('submit_date',)", 'object_name': 'ThreadedComment', '_ormbases': ['comments.Comment']},
+            'by_author': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
+            'comment_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['comments.Comment']", 'unique': 'True', 'primary_key': 'True'}),
+            'replied_to': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'null': 'True', 'to': "orm['generic.ThreadedComment']"})
+        },
         'mezzanine_recipes.cookingtime': {
             'Meta': {'object_name': 'CookingTime'},
             'hours': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'minutes': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'recipe': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['mezzanine_recipes.Recipe']", 'unique': 'True'})
+            'recipe': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'cooking_time'", 'unique': 'True', 'to': "orm['mezzanine_recipes.Recipe']"})
         },
         'mezzanine_recipes.ingredient': {
             'Meta': {'ordering': "('_order',)", 'object_name': 'Ingredient'},
@@ -169,28 +204,16 @@ class Migration(SchemaMigration):
             'ingredient': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'note': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'quantity': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
-            'recipe': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['mezzanine_recipes.Recipe']"}),
+            'recipe': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'ingredients'", 'to': "orm['mezzanine_recipes.Recipe']"}),
             'unit': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         'mezzanine_recipes.recipe': {
-            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'Recipe', '_ormbases': ['pages.Page']},
-            'allow_comments': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'categories': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'recipes'", 'blank': 'True', 'to': "orm['mezzanine_recipes.RecipeCategory']"}),
-            'content': ('mezzanine.core.fields.RichTextField', [], {}),
-            'cover': ('mezzanine.core.fields.FileField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
+            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'Recipe', '_ormbases': ['blog.BlogPost']},
+            'blogpost_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['blog.BlogPost']", 'unique': 'True', 'primary_key': 'True'}),
             'difficulty': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'page_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['pages.Page']", 'unique': 'True', 'primary_key': 'True'}),
             'portions': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'source': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'summary': ('django.db.models.fields.CharField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'recipes'", 'to': "orm['auth.User']"})
-        },
-        'mezzanine_recipes.recipecategory': {
-            'Meta': {'object_name': 'RecipeCategory'},
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
-            'slug': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '500'})
+            'summary': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'})
         },
         'mezzanine_recipes.restperiod': {
             'Meta': {'object_name': 'RestPeriod'},
@@ -198,36 +221,14 @@ class Migration(SchemaMigration):
             'hours': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'minutes': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'recipe': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['mezzanine_recipes.Recipe']", 'unique': 'True'})
+            'recipe': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'rest_period'", 'unique': 'True', 'to': "orm['mezzanine_recipes.Recipe']"})
         },
         'mezzanine_recipes.workinghours': {
             'Meta': {'object_name': 'WorkingHours'},
             'hours': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'minutes': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'recipe': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['mezzanine_recipes.Recipe']", 'unique': 'True'})
-        },
-        'pages.page': {
-            'Meta': {'ordering': "('titles',)", 'object_name': 'Page'},
-            '_meta_title': ('django.db.models.fields.CharField', [], {'max_length': '500', 'null': 'True', 'blank': 'True'}),
-            '_order': ('django.db.models.fields.IntegerField', [], {'null': 'True'}),
-            'content_model': ('django.db.models.fields.CharField', [], {'max_length': '50', 'null': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'expiry_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'gen_description': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'in_menus': ('mezzanine.pages.fields.MenusField', [], {'default': '[1, 2, 3]', 'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'keywords': ('mezzanine.generic.fields.KeywordsField', [], {'object_id_field': "'object_pk'", 'to': "orm['generic.AssignedKeyword']", 'frozen_by_south': 'True'}),
-            'keywords_string': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'login_required': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
-            'parent': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'children'", 'null': 'True', 'to': "orm['pages.Page']"}),
-            'publish_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
-            'short_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
-            'slug': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
-            'status': ('django.db.models.fields.IntegerField', [], {'default': '2'}),
-            'title': ('django.db.models.fields.CharField', [], {'max_length': '500'}),
-            'titles': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'null': 'True'})
+            'recipe': ('django.db.models.fields.related.OneToOneField', [], {'related_name': "'working_hours'", 'unique': 'True', 'to': "orm['mezzanine_recipes.Recipe']"})
         },
         'sites.site': {
             'Meta': {'ordering': "('domain',)", 'object_name': 'Site', 'db_table': "'django_site'"},

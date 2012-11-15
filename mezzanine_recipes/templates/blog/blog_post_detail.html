@@ -1,0 +1,122 @@
+{% overextends "blog/blog_post_detail.html" %}
+
+{% load mezzanine_tags comment_tags keyword_tags rating_tags recipe_tags i18n %}
+
+{% block main %}
+
+<h6>
+    {% trans "Posted by" %}:
+    {% with blog_post.user as author %}
+    <a href="{% url blog_post_list_author author %}">{{ author.get_full_name|default:author.username }}</a>
+    {% endwith %}
+    {{ blog_post.publish_date|timesince }} {% trans "ago" %}
+</h6>
+<p>
+    {% if blog_post.allow_comments %}(<a href="#comments">{% spaceless %}
+        {% blocktrans count blog_post.comments_count as comments_count %}1 comment{% plural %}{{ comments_count }} comments{% endblocktrans %}
+    {% endspaceless %}</a>){% endif %}
+</p>
+
+{% block recipe_summary %}
+{% if page.recipe.summary %}
+<div class="well well-small">
+    {% editable page.recipe.summary %}<h3>{{ page.recipe.summary }}</h3>{% endeditable %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% if blog_post.featured_image %}
+<p><img src="{{ MEDIA_URL }}{% thumbnail blog_post.featured_image 670 0 %}"></p>
+{% endif %}
+
+{% block recipe_hero %}
+<div class="hero-unit">
+
+    {% block recipe_ingredients %}
+    {% if blog_post.ingredients.count %}
+        <dl class="dl-horizontal">
+            <h4><dt>{% trans 'Ingredients' %}:</dt></h4>
+            {% for ingredient in blog_post.ingredients.all %}
+                <dd>{{ ingredient.quantity }} {% get_unit_name ingredient %} {{ ingredient }} {{ ingredient.note }}</dd>
+            {% endfor %}
+        </dl>
+    {% endif %}
+    {% endblock %}
+
+    {% block recipe_portions %}
+    {% if blog_post.portions %}
+        {% editable blog_post.portions %}
+            <dl class="dl-horizontal">
+                <h4><dt>{% trans 'Portions' %}:</dt></h4>
+                <dd>{{ blog_post.portions }}</dd>
+            </dl>
+        {% endeditable %}
+    {% endif %}
+    {% endblock %}
+
+    {% block recipe_difficulty %}
+    {% if blog_post.difficulty %}
+        {% editable blog_post.difficulty %}
+            <dl class="dl-horizontal">
+                <h4><dt>{% trans 'Difficulty' %}:</dt></h4>
+                <dd>{% get_difficulty_name blog_post %}</dd>
+            </dl>
+        {% endeditable %}
+    {% endif %}
+    {% endblock %}
+
+    {% block recipe_working_hours %}
+    {% if blog_post.working_hours %}
+        <dl class="dl-horizontal">
+            <h4><dt>{% trans 'Working Hours' %}:</dt></h4>
+            <dd>{% get_time_period blog_post.working_hours %} {% trans 'Hours' %}</dd>
+        </dl>
+    {% endif %}
+    {% endblock %}
+
+    {% block recipe_cooking_time %}
+    {% if blog_post.cooking_time %}
+        <dl class="dl-horizontal">
+            <h4><dt>{% trans 'Cooking Time' %}:</dt></h4>
+            <dd>{% get_time_period blog_post.cooking_time %} {% trans 'Hours' %}</dd>
+        </dl>
+    {% endif %}
+    {% endblock %}
+
+    {% block recipe_rest_period %}
+    {% if blog_post.rest_period %}
+        <dl class="dl-horizontal">
+            <h4><dt>{% trans 'Rest Period' %}:</dt></h4>
+            <dd>{% get_time_period blog_post.rest_period %} {% trans 'Days' %}</dd>
+        </dl>
+    {% endif %}
+    {% endblock %}
+
+</div>
+{% endblock %}
+
+{% editable blog_post.content %}
+{{ blog_post.content|richtext_filter|safe }}
+{% endeditable %}
+
+{% keywords_for blog_post as tags %}
+{% if tags %}
+{% spaceless %}
+<ul class="unstyled tags">
+    <li>{% trans "Tags" %}:</li>
+    {% for tag in tags %}
+    <li><a href="{% url blog_post_list_tag tag.slug %}">{{ tag }}</a></li>
+    {% endfor %}
+</ul>
+{% endspaceless %}
+{% endif %}
+
+{% rating_for blog_post %}
+
+{% set_short_url_for blog_post %}
+<a class="btn small primary share-twitter" target="_blank" href="http://twitter.com/home?status={{ blog_post.short_url|urlencode }}%20{{ blog_post.title|urlencode }}">{% trans "Share on Twitter" %}</a>
+<a class="btn small primary share-facebook" target="_blank" href="http://facebook.com/sharer.php?u={{ request.build_absolute_uri }}&amp;t={{ blog_post.title|urlencode }}">{% trans "Share on Facebook" %}</a>
+
+{% if blog_post.allow_comments %}{% comments_for blog_post %}{% endif %}
+
+{% endblock %}
