@@ -2,12 +2,19 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from mezzanine.core.models import Orderable
-from mezzanine.blog.models import BlogPost
+from mezzanine.blog.models import BlogPost as MezzanineBlogPost
 
 from . import fields
 
 
-class Recipe(BlogPost):
+class BlogPost(MezzanineBlogPost):
+    class Meta:
+        verbose_name = _("Blog post")
+        verbose_name_plural = _("Blog posts")
+        ordering = ("-publish_date",)
+
+
+class Recipe(MezzanineBlogPost):
     """
     Implements the recipe type of page with all recipe fields.
     """

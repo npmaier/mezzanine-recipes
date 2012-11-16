@@ -2,9 +2,10 @@ from copy import deepcopy
 from django.contrib import admin
 
 from mezzanine.blog.admin import BlogPostAdmin
+from mezzanine.blog.models import BlogPost as MezzanineBlogPost
 from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin, TabularDynamicInlineAdmin
 
-from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod
+from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod, BlogPost
 
 
 blogpost_fieldsets = deepcopy(BlogPostAdmin.fieldsets)
@@ -38,4 +39,6 @@ class RecipeAdmin(BlogPostAdmin):
         return DisplayableAdmin.save_form(self, request, form, change)
 
 
+admin.site.unregister(MezzanineBlogPost)
+admin.site.register(BlogPost, BlogPostAdmin)
 admin.site.register(Recipe, RecipeAdmin)

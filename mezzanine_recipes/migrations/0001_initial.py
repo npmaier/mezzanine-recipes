@@ -8,6 +8,12 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'BlogPost'
+        db.create_table('mezzanine_recipes_blogpost', (
+            ('blogpost_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['blog.BlogPost'], unique=True, primary_key=True)),
+        ))
+        db.send_create_signal('mezzanine_recipes', ['BlogPost'])
+
         # Adding model 'Recipe'
         db.create_table('mezzanine_recipes_recipe', (
             ('blogpost_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['blog.BlogPost'], unique=True, primary_key=True)),
@@ -60,6 +66,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'BlogPost'
+        db.delete_table('mezzanine_recipes_blogpost')
+
         # Deleting model 'Recipe'
         db.delete_table('mezzanine_recipes_recipe')
 
@@ -190,6 +199,10 @@ class Migration(SchemaMigration):
             'comment_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['comments.Comment']", 'unique': 'True', 'primary_key': 'True'}),
             'replied_to': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'null': 'True', 'to': "orm['generic.ThreadedComment']"})
         },
+        'mezzanine_recipes.blogpost': {
+            'Meta': {'object_name': 'BlogPost'},
+            'blogpost_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['blog.BlogPost']", 'unique': 'True', 'primary_key': 'True'})
+        },
         'mezzanine_recipes.cookingtime': {
             'Meta': {'object_name': 'CookingTime'},
             'hours': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
@@ -208,7 +221,7 @@ class Migration(SchemaMigration):
             'unit': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         'mezzanine_recipes.recipe': {
-            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'Recipe', '_ormbases': ['blog.BlogPost']},
+            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'Recipe'},
             'blogpost_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['blog.BlogPost']", 'unique': 'True', 'primary_key': 'True'}),
             'difficulty': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'portions': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),

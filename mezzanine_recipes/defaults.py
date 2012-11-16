@@ -19,16 +19,16 @@ register_setting(
     description=_("Controls the ordering and grouping of the admin menu."),
     editable=False,
     default=(
-        (_("Content"), ("pages.Page", "blog.BlogPost", "mezzanine_recipes.Recipe",
+        (_("Content"), ("pages.Page", "mezzanine_recipes.BlogPost", "mezzanine_recipes.Recipe",
                         "generic.ThreadedComment", (_("Media Library"), "fb_browse"),)),
         (_("Site"), ("sites.Site", "redirects.Redirect", "conf.Setting")),
         (_("Users"), ("auth.User", "auth.Group",)),
-        ),
+    ),
 )
 
 register_setting(
     name="BLOG_USE_FEATURED_IMAGE",
     description=_("Enable featured images in recipes"),
     editable=False,
-    default=True,
+    default=False,
 )
