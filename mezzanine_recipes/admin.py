@@ -10,6 +10,9 @@ from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod, B
 
 blogpost_fieldsets = deepcopy(BlogPostAdmin.fieldsets)
 blogpost_fieldsets[0][1]["fields"].extend(["summary", "portions", "difficulty", "source",])
+blogpost_fieldsets[0][1]["fields"].insert(-6, "featured_image")
+recipe_list_display = deepcopy(BlogPostAdmin.list_display)
+recipe_list_display.insert(0, "admin_thumb")
 
 class WorkingHoursInline(admin.TabularInline):
     model = WorkingHours
@@ -30,6 +33,7 @@ class RecipeAdmin(BlogPostAdmin):
     """
     inlines = (IngredientInline, WorkingHoursInline, CookingTimeInline, RestPeriodInline,)
     fieldsets = blogpost_fieldsets
+    list_display = recipe_list_display
 
     def save_form(self, request, form, change):
         """
