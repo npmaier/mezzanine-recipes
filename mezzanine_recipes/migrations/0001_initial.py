@@ -8,15 +8,22 @@ from django.db import models
 class Migration(SchemaMigration):
 
     def forwards(self, orm):
+        # Adding model 'BlogProxy'
+        db.create_table('mezzanine_recipes_blogproxy', (
+            ('blogpost_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['blog.BlogPost'], unique=True, primary_key=True)),
+            ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'], null=True)),
+        ))
+        db.send_create_signal('mezzanine_recipes', ['BlogProxy'])
+
         # Adding model 'BlogPost'
         db.create_table('mezzanine_recipes_blogpost', (
-            ('blogpost_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['blog.BlogPost'], unique=True, primary_key=True)),
+            ('blogproxy_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['mezzanine_recipes.BlogProxy'], unique=True, primary_key=True)),
         ))
         db.send_create_signal('mezzanine_recipes', ['BlogPost'])
 
         # Adding model 'Recipe'
         db.create_table('mezzanine_recipes_recipe', (
-            ('blogpost_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['blog.BlogPost'], unique=True, primary_key=True)),
+            ('blogproxy_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['mezzanine_recipes.BlogProxy'], unique=True, primary_key=True)),
             ('summary', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
             ('portions', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
             ('difficulty', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
@@ -66,6 +73,9 @@ class Migration(SchemaMigration):
 
 
     def backwards(self, orm):
+        # Deleting model 'BlogProxy'
+        db.delete_table('mezzanine_recipes_blogproxy')
+
         # Deleting model 'BlogPost'
         db.delete_table('mezzanine_recipes_blogpost')
 
@@ -200,8 +210,13 @@ class Migration(SchemaMigration):
             'replied_to': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'comments'", 'null': 'True', 'to': "orm['generic.ThreadedComment']"})
         },
         'mezzanine_recipes.blogpost': {
-            'Meta': {'object_name': 'BlogPost'},
-            'blogpost_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['blog.BlogPost']", 'unique': 'True', 'primary_key': 'True'})
+            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'BlogPost', '_ormbases': ['mezzanine_recipes.BlogProxy']},
+            'blogproxy_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['mezzanine_recipes.BlogProxy']", 'unique': 'True', 'primary_key': 'True'})
+        },
+        'mezzanine_recipes.blogproxy': {
+            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'BlogProxy', '_ormbases': ['blog.BlogPost']},
+            'blogpost_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['blog.BlogPost']", 'unique': 'True', 'primary_key': 'True'}),
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']", 'null': 'True'})
         },
         'mezzanine_recipes.cookingtime': {
             'Meta': {'object_name': 'CookingTime'},
@@ -221,8 +236,8 @@ class Migration(SchemaMigration):
             'unit': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'})
         },
         'mezzanine_recipes.recipe': {
-            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'Recipe'},
-            'blogpost_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['blog.BlogPost']", 'unique': 'True', 'primary_key': 'True'}),
+            'Meta': {'ordering': "('-publish_date',)", 'object_name': 'Recipe', '_ormbases': ['mezzanine_recipes.BlogProxy']},
+            'blogproxy_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['mezzanine_recipes.BlogProxy']", 'unique': 'True', 'primary_key': 'True'}),
             'difficulty': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'portions': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'source': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),

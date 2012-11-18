@@ -1,20 +1,62 @@
 from django.db import models
+from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 
 from mezzanine.core.models import Orderable
+from mezzanine.core.managers import DisplayableManager
 from mezzanine.blog.models import BlogPost as MezzanineBlogPost
 
 from . import fields
 
 
-class BlogPost(MezzanineBlogPost):
+class SubclassingQuerySet(QuerySet):
+
+    def __getitem__(self, k):
+        result = super(SubclassingQuerySet, self).__getitem__(k)
+        if isinstance(result, BlogProxy) :
+            return result.as_leaf_class()
+        else :
+            return result
+
+    def __iter__(self):
+        for item in super(SubclassingQuerySet, self).__iter__():
+            yield item.as_leaf_class()
+
+
+class BlogManager(DisplayableManager):
+    def get_query_set(self):
+        return SubclassingQuerySet(self.model)
+
+
+class BlogProxy(MezzanineBlogPost):
+    content_type = models.ForeignKey(ContentType,editable=False,null=True)
+    template_dir = "blog/"
+    objects = BlogManager()
+
+    def save(self, *args, **kwargs):
+        if not self.content_type:
+            self.content_type = ContentType.objects.get_for_model(self.__class__)
+            super(BlogProxy, self).save(*args, **kwargs)
+
+    def as_leaf_class(self):
+        content_type = self.content_type
+        model = content_type.model_class()
+        if model == BlogProxy:
+            return self
+        return model.objects.get(id=self.id)
+
+
+class BlogPost(BlogProxy):
+    objects = BlogManager()
+
     class Meta:
         verbose_name = _("Blog post")
         verbose_name_plural = _("Blog posts")
         ordering = ("-publish_date",)
 
 
-class Recipe(MezzanineBlogPost):
+class Recipe(BlogProxy):
     """
     Implements the recipe type of page with all recipe fields.
     """
@@ -22,6 +64,9 @@ class Recipe(MezzanineBlogPost):
     portions = models.IntegerField(_("Portions"), blank=True, null=True)
     difficulty = models.IntegerField(_("Difficulty"), choices=fields.DIFFICULTIES, blank=True, null=True)
     source = models.URLField(_("Source"), blank=True, null=True, help_text=_("URL of the source recipe"))
+
+    template_dir = "recipe/"
+    objects = BlogManager()
 
     search_fields = ("title", "summary", "description",)
 

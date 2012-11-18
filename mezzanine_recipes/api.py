@@ -11,7 +11,7 @@ from tastypie.resources import ModelResource
 from tastypie.cache import SimpleCache
 from tastypie.throttle import CacheDBThrottle
 from tastypie.utils import trailing_slash
-from .models import Recipe, RecipeCategory, Ingredient, WorkingHours, CookingTime, RestPeriod
+from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod
 from .fields import DIFFICULTIES, UNITS
 
 
@@ -19,7 +19,7 @@ class RecipeCategoryResource(ModelResource):
     recipes = fields.ToManyField('mezzanine_recipes.api.RecipeResource', 'recipes')
 
     class Meta:
-        queryset = RecipeCategory.objects.all()
+        #queryset = RecipeCategory.objects.all()
         resource_name = "categories"
         fields = ['id', 'title',]
         list_allowed_methods = ['get',]
@@ -28,10 +28,10 @@ class RecipeCategoryResource(ModelResource):
         cache = SimpleCache()
         throttle = CacheDBThrottle()
 
-    def get_object_list(self, request, *args, **kwargs):
-        return RecipeCategory.objects.filter(Q(recipes__publish_date__lte=now()) | Q(recipes__publish_date__isnull=True),
-                                             Q(recipes__expiry_date__gte=now()) | Q(recipes__expiry_date__isnull=True),
-                                             Q(recipes__status=CONTENT_STATUS_PUBLISHED)).distinct()
+    #def get_object_list(self, request, *args, **kwargs):
+        #return RecipeCategory.objects.filter(Q(recipes__publish_date__lte=now()) | Q(recipes__publish_date__isnull=True),
+        #                                     Q(recipes__expiry_date__gte=now()) | Q(recipes__expiry_date__isnull=True),
+        #                                     Q(recipes__status=CONTENT_STATUS_PUBLISHED)).distinct()
 
 
 
@@ -51,7 +51,7 @@ class CommentResource(ModelResource):
 
 
 class RecipeResource(ModelResource):
-    categories = fields.ToManyField('mezzanine_recipes.api.RecipeCategoryResource', 'categories', full=True)
+    #categories = fields.ToManyField('mezzanine_recipes.api.RecipeCategoryResource', 'categories', full=True)
     ingredients = fields.ToManyField('mezzanine_recipes.api.IngredientResource', 'ingredients', full=True)
     working_hours = fields.ToOneField('mezzanine_recipes.api.WorkingHoursResource', 'working_hours', full=True, null=True)
     cooking_time = fields.ToOneField('mezzanine_recipes.api.CookingTimeResource', 'cooking_time', full=True, null=True)
