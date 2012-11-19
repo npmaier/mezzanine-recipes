@@ -18,7 +18,7 @@ def blog_post_detail(request, slug, year=None, month=None, day=None, template="b
     posts's slug.
     """
 
-    blog_posts = BlogProxy.objects.published(for_user=request.user).filter(slug=slug)
+    blog_posts = BlogProxy.secondary.published(for_user=request.user).filter(slug=slug)
     if len(blog_posts) != 1:
         raise Http404(_('Slug %s does not exist.' % slug))
     blog_post = blog_posts[0]

@@ -29,10 +29,13 @@ class BlogManager(DisplayableManager):
         return SubclassingQuerySet(self.model)
 
 
+
 class BlogProxy(MezzanineBlogPost):
     content_type = models.ForeignKey(ContentType,editable=False,null=True)
+
     template_dir = "blog/"
-    objects = BlogManager()
+
+    secondary = BlogManager()
 
     def save(self, *args, **kwargs):
         if not self.content_type:
@@ -48,7 +51,7 @@ class BlogProxy(MezzanineBlogPost):
 
 
 class BlogPost(BlogProxy):
-    objects = BlogManager()
+    secondary = BlogManager()
 
     class Meta:
         verbose_name = _("Blog post")
@@ -66,7 +69,8 @@ class Recipe(BlogProxy):
     source = models.URLField(_("Source"), blank=True, null=True, help_text=_("URL of the source recipe"))
 
     template_dir = "recipe/"
-    objects = BlogManager()
+
+    secondary = BlogManager()
 
     search_fields = ("title", "summary", "description",)
 
