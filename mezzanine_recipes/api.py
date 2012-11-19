@@ -3,23 +3,27 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Q
 from django.http import Http404
-from mezzanine.generic.models import ThreadedComment
+
+from mezzanine.generic.models import ThreadedComment, AssignedKeyword, Keyword
+from mezzanine.blog.models import BlogCategory
 from mezzanine.core.models import CONTENT_STATUS_PUBLISHED
 from mezzanine.utils.timezone import now
+
 from tastypie import fields
 from tastypie.resources import ModelResource
 from tastypie.cache import SimpleCache
 from tastypie.throttle import CacheDBThrottle
 from tastypie.utils import trailing_slash
-from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod
+
+from .models import BlogProxy, Recipe, BlogPost, Ingredient, WorkingHours, CookingTime, RestPeriod
 from .fields import DIFFICULTIES, UNITS
 
 
-class RecipeCategoryResource(ModelResource):
-    recipes = fields.ToManyField('mezzanine_recipes.api.RecipeResource', 'recipes')
+class CategoryResource(ModelResource):
+    recipes = fields.ToManyField('mezzanine_recipes.api.RecipeResource', 'blogposts')
 
     class Meta:
-        #queryset = RecipeCategory.objects.all()
+        queryset = BlogCategory.objects.all()
         resource_name = "categories"
         fields = ['id', 'title',]
         list_allowed_methods = ['get',]
@@ -28,10 +32,10 @@ class RecipeCategoryResource(ModelResource):
         cache = SimpleCache()
         throttle = CacheDBThrottle()
 
-    #def get_object_list(self, request, *args, **kwargs):
-        #return RecipeCategory.objects.filter(Q(recipes__publish_date__lte=now()) | Q(recipes__publish_date__isnull=True),
-        #                                     Q(recipes__expiry_date__gte=now()) | Q(recipes__expiry_date__isnull=True),
-        #                                     Q(recipes__status=CONTENT_STATUS_PUBLISHED)).distinct()
+    def get_object_list(self, request, *args, **kwargs):
+        return BlogCategory.objects.filter(Q(blogposts__publish_date__lte=now()) | Q(blogposts__publish_date__isnull=True),
+                                           Q(blogposts__expiry_date__gte=now()) | Q(blogposts__expiry_date__isnull=True),
+                                           Q(blogposts__status=CONTENT_STATUS_PUBLISHED)).distinct()
 
 
 
@@ -42,6 +46,7 @@ class CommentResource(ModelResource):
         fields = ['id', 'comment', 'submit_date', 'user_name',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
+        limit = 0
         cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
@@ -50,8 +55,91 @@ class CommentResource(ModelResource):
 
 
 
+class KeywordResource(ModelResource):
+    keyword = fields.ToManyField('mezzanine_recipes.api.AssignedKeywordResource', 'assignments')
+
+    class Meta:
+        queryset = Keyword.objects.all()
+        resource_name = "keywords"
+        fields = ['id', 'title']
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        limit = 0
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            'title': ('exact',),
+        }
+
+
+
+class AssignedKeywordResource(ModelResource):
+    assignments = fields.ToOneField('mezzanine_recipes.api.KeywordResource', 'keyword', full=True)
+
+    class Meta:
+        queryset = AssignedKeyword.objects.all()
+        resource_name = "assigned_keywords"
+        fields = ['id', '_order',]
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            'object_pk': ('exact',),
+            }
+
+
+
+class BlogPostResource(ModelResource):
+    categories = fields.ToManyField('mezzanine_recipes.api.CategoryResource', 'categories', full=True)
+
+    class Meta:
+        queryset = BlogPost.objects.published().order_by('-publish_date')
+        resource_name = "blog"
+        fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count',]
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            "publish_date": ('gt',),
+            }
+
+    def override_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
+            ]
+
+    def get_search(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+
+        sqs = BlogPost.objects.search(request.GET.get('q', ''))
+        paginator = Paginator(sqs, 20)
+
+        try:
+            page = paginator.page(int(request.GET.get('page', 1)))
+        except InvalidPage:
+            raise Http404(_("Sorry, no results on that page."))
+
+        objects = []
+
+        for result in page.object_list:
+            bundle = self.build_bundle(obj=result, request=request)
+            bundle = self.full_dehydrate(bundle)
+            objects.append(bundle)
+
+        object_list = {
+            'objects': objects,
+            }
+
+        self.log_throttled_access(request)
+        return self.create_response(request, object_list)
+
+
+
 class RecipeResource(ModelResource):
-    #categories = fields.ToManyField('mezzanine_recipes.api.RecipeCategoryResource', 'categories', full=True)
+    categories = fields.ToManyField('mezzanine_recipes.api.CategoryResource', 'categories', full=True)
     ingredients = fields.ToManyField('mezzanine_recipes.api.IngredientResource', 'ingredients', full=True)
     working_hours = fields.ToOneField('mezzanine_recipes.api.WorkingHoursResource', 'working_hours', full=True, null=True)
     cooking_time = fields.ToOneField('mezzanine_recipes.api.CookingTimeResource', 'cooking_time', full=True, null=True)
@@ -60,14 +148,14 @@ class RecipeResource(ModelResource):
     class Meta:
         queryset = Recipe.objects.published().order_by('-publish_date')
         resource_name = "recipe"
-        fields = ['id', 'title', 'cover', 'summary', 'description', 'portions', 'difficulty', 'publish_date',]
+        fields = ['id', 'title', 'featured_image', 'summary', 'description', 'portions', 'difficulty', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             "publish_date": ('gt',),
-        }
+            }
 
     def dehydrate_difficulty(self, bundle):
         return dict(DIFFICULTIES)[bundle.data['difficulty']]
@@ -75,15 +163,12 @@ class RecipeResource(ModelResource):
     def override_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
-        ]
+            ]
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
-        #self.is_authenticated(request)
         self.throttle_check(request)
 
-        # Do the query.
-        #sqs = SearchQuerySet().models(Recipe).load_all().auto_query(request.GET.get('q', ''))
         sqs = Recipe.objects.search(request.GET.get('q', ''))
         paginator = Paginator(sqs, 20)
 
@@ -101,7 +186,66 @@ class RecipeResource(ModelResource):
 
         object_list = {
             'objects': objects,
+            }
+
+        self.log_throttled_access(request)
+        return self.create_response(request, object_list)
+
+
+
+class PostResource(ModelResource):
+    #categories = fields.ToManyField('mezzanine_recipes.api.CategoryResource', 'categories', full=True)
+
+    class Meta:
+        queryset = BlogProxy.secondary.published().order_by('-publish_date')
+        resource_name = "post"
+        fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count',]
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            "publish_date": ('gt',),
         }
+
+    def dehydrate(self, bundle):
+        if isinstance(bundle.obj, BlogPost):
+            blog_res = BlogPostResource()
+            rr_bundle = blog_res.build_bundle(obj=bundle.obj, request=bundle.request)
+            bundle.data = blog_res.full_dehydrate(rr_bundle).data
+        elif isinstance(bundle.obj, Recipe):
+            recipe_res = RecipeResource()
+            br_bundle = recipe_res.build_bundle(obj=bundle.obj, request=bundle.request)
+            bundle.data = recipe_res.full_dehydrate(br_bundle).data
+        return bundle
+
+    def override_urls(self):
+        return [
+            url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
+        ]
+
+    def get_search(self, request, **kwargs):
+        self.method_check(request, allowed=['get'])
+        self.throttle_check(request)
+
+        sqs = BlogProxy.secondary.search(request.GET.get('q', ''))
+        paginator = Paginator(sqs, 20)
+
+        try:
+            page = paginator.page(int(request.GET.get('page', 1)))
+        except InvalidPage:
+            raise Http404(_("Sorry, no results on that page."))
+
+        objects = []
+
+        for result in page.object_list:
+            bundle = self.build_bundle(obj=result, request=request)
+            bundle = self.full_dehydrate(bundle)
+            objects.append(bundle)
+
+        object_list = {
+            'objects': objects,
+            }
 
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
