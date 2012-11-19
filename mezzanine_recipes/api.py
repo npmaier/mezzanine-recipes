@@ -3,10 +3,13 @@ from django.utils.translation import ugettext_lazy as _
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Q
 from django.http import Http404
+from django.core.serializers import json
+from django.utils import simplejson
 
 from mezzanine.generic.models import ThreadedComment, AssignedKeyword, Keyword
 from mezzanine.blog.models import BlogCategory
 from mezzanine.core.models import CONTENT_STATUS_PUBLISHED
+from mezzanine.conf import settings
 from mezzanine.utils.timezone import now
 
 from tastypie import fields
@@ -14,9 +17,21 @@ from tastypie.resources import ModelResource
 from tastypie.cache import SimpleCache
 from tastypie.throttle import CacheDBThrottle
 from tastypie.utils import trailing_slash
+from tastypie.serializers import Serializer
 
 from .models import BlogProxy, Recipe, BlogPost, Ingredient, WorkingHours, CookingTime, RestPeriod
 from .fields import DIFFICULTIES, UNITS
+
+
+class PrettyJSONSerializer(Serializer):
+    json_indent = 2
+
+    def to_json(self, data, options=None):
+        options = options or {}
+        data = self.to_simple(data, options)
+        return simplejson.dumps(data, cls=json.DjangoJSONEncoder,
+            sort_keys=True, ensure_ascii=False, indent=self.json_indent)
+
 
 
 class CategoryResource(ModelResource):
@@ -31,6 +46,8 @@ class CategoryResource(ModelResource):
         limit = 0
         cache = SimpleCache()
         throttle = CacheDBThrottle()
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return BlogCategory.objects.filter(Q(blogposts__publish_date__lte=now()) | Q(blogposts__publish_date__isnull=True),
@@ -52,6 +69,8 @@ class CommentResource(ModelResource):
         filtering = {
             'object_pk': ('exact',),
         }
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
 
 
@@ -70,6 +89,8 @@ class KeywordResource(ModelResource):
         filtering = {
             'title': ('exact',),
         }
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
 
 
@@ -86,7 +107,9 @@ class AssignedKeywordResource(ModelResource):
         throttle = CacheDBThrottle()
         filtering = {
             'object_pk': ('exact',),
-            }
+        }
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
 
 
@@ -103,7 +126,9 @@ class BlogPostResource(ModelResource):
         throttle = CacheDBThrottle()
         filtering = {
             "publish_date": ('gt',),
-            }
+        }
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def override_urls(self):
         return [
@@ -155,7 +180,9 @@ class RecipeResource(ModelResource):
         throttle = CacheDBThrottle()
         filtering = {
             "publish_date": ('gt',),
-            }
+        }
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def dehydrate_difficulty(self, bundle):
         return dict(DIFFICULTIES)[bundle.data['difficulty']]
@@ -207,6 +234,8 @@ class PostResource(ModelResource):
         filtering = {
             "publish_date": ('gt',),
         }
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def dehydrate(self, bundle):
         if isinstance(bundle.obj, BlogPost):
@@ -264,6 +293,8 @@ class IngredientResource(ModelResource):
         limit = 0
         cache = SimpleCache()
         throttle = CacheDBThrottle()
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return Ingredient.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -286,6 +317,8 @@ class WorkingHoursResource(ModelResource):
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return WorkingHours.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -305,6 +338,8 @@ class CookingTimeResource(ModelResource):
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return CookingTime.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -324,6 +359,8 @@ class RestPeriodResource(ModelResource):
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return RestPeriod.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
