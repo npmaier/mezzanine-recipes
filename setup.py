@@ -15,7 +15,7 @@ setup(
     ],
     install_requires=[
         'Mezzanine==1.2.4',
-        'django-tastypie==0.9.11',
+        'django-tastypie==0.9.12-alpha',
         'uuid==1.30',
     ],
 )

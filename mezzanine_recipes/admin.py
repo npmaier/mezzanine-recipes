@@ -1,9 +1,15 @@
 from copy import deepcopy
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import User
+from django.conf import settings
 
 from mezzanine.blog.admin import BlogPostAdmin
 from mezzanine.blog.models import BlogPost as MezzanineBlogPost
 from mezzanine.core.admin import DisplayableAdmin, OwnableAdmin, TabularDynamicInlineAdmin
+
+from tastypie.admin import ApiKeyInline
+from tastypie.models import ApiAccess
 
 from .models import Recipe, Ingredient, WorkingHours, CookingTime, RestPeriod, BlogPost
 
@@ -46,3 +52,13 @@ class RecipeAdmin(BlogPostAdmin):
 admin.site.unregister(MezzanineBlogPost)
 admin.site.register(BlogPost, BlogPostAdmin)
 admin.site.register(Recipe, RecipeAdmin)
+
+
+class UserModelAdmin(UserAdmin):
+    if 'tastypie' in settings.INSTALLED_APPS:
+        inlines = UserAdmin.inlines + [ApiKeyInline]
+
+if 'tastypie' in settings.INSTALLED_APPS:
+    admin.site.register(ApiAccess)
+    admin.site.unregister(User)
+    admin.site.register(User, UserModelAdmin)

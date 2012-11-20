@@ -23,6 +23,7 @@ register_setting(
                         "generic.ThreadedComment", (_("Media Library"), "fb_browse"),)),
         (_("Site"), ("sites.Site", "redirects.Redirect", "conf.Setting")),
         (_("Users"), ("auth.User", "auth.Group",)),
+        (_("REST Service"), ("tastypie.ApiKey", "tastypie.ApiAccess",)),
     ),
 )
 
