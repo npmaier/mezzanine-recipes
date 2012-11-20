@@ -1,16 +1,15 @@
+import re
+
 from django.conf.urls.defaults import url
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Q
 from django.http import Http404
-from django.core.serializers import json
 from django.utils import simplejson
 
-from mezzanine.generic.models import ThreadedComment, AssignedKeyword, Keyword
+from mezzanine.generic.models import ThreadedComment, AssignedKeyword, Keyword, Rating
 from mezzanine.blog.models import BlogCategory
 from mezzanine.core.models import CONTENT_STATUS_PUBLISHED
-from mezzanine.conf import settings
 from mezzanine.utils.timezone import now
 
 from tastypie import fields
@@ -26,14 +25,59 @@ from .models import BlogProxy, Recipe, BlogPost, Ingredient, WorkingHours, Cooki
 from .fields import DIFFICULTIES, UNITS
 
 
-class PrettyJSONSerializer(Serializer):
-    json_indent = 2
+class CamelCaseJSONSerializer(Serializer):
+    formats = ['json']
+    content_types = {
+        'json': 'application/json',
+        }
 
     def to_json(self, data, options=None):
-        options = options or {}
+        # Changes underscore_separated names to camelCase names to go from python convention to javacsript convention
         data = self.to_simple(data, options)
-        return simplejson.dumps(data, cls=json.DjangoJSONEncoder,
-            sort_keys=True, ensure_ascii=False, indent=self.json_indent)
+
+        def underscoreToCamel(match):
+            return match.group()[0] + match.group()[2].upper()
+
+        def camelize(data):
+            if isinstance(data, dict):
+                new_dict = {}
+                for key, value in data.items():
+                    new_key = re.sub(r"[a-z]_[a-z]", underscoreToCamel, key)
+                    new_dict[new_key] = camelize(value)
+                return new_dict
+            if isinstance(data, (list, tuple)):
+                for i in range(len(data)):
+                    data[i] = camelize(data[i])
+                return data
+            return data
+
+        camelized_data = camelize(data)
+
+        return simplejson.dumps(camelized_data, sort_keys=True)
+
+    def from_json(self, content):
+        # Changes camelCase names to underscore_separated names to go from javascript convention to python convention
+        data = simplejson.loads(content)
+
+        def camelToUnderscore(match):
+            return match.group()[0] + "_" + match.group()[1].lower()
+
+        def underscorize(data):
+            if isinstance(data, dict):
+                new_dict = {}
+                for key, value in data.items():
+                    new_key = re.sub(r"[a-z][A-Z]", camelToUnderscore, key)
+                    new_dict[new_key] = underscorize(value)
+                return new_dict
+            if isinstance(data, (list, tuple)):
+                for i in range(len(data)):
+                    data[i] = underscorize(data[i])
+                return data
+            return data
+
+        underscored_data = underscorize(data)
+
+        return underscored_data
 
 
 
@@ -49,53 +93,12 @@ class CategoryResource(ModelResource):
         limit = 0
         cache = SimpleCache()
         throttle = CacheDBThrottle()
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return BlogCategory.objects.filter(Q(blogposts__publish_date__lte=now()) | Q(blogposts__publish_date__isnull=True),
                                            Q(blogposts__expiry_date__gte=now()) | Q(blogposts__expiry_date__isnull=True),
                                            Q(blogposts__status=CONTENT_STATUS_PUBLISHED)).distinct()
-
-
-
-
-class KeywordResource(ModelResource):
-    keyword = fields.ToManyField('mezzanine_recipes.api.AssignedKeywordResource', 'assignments')
-
-    class Meta:
-        queryset = Keyword.objects.all()
-        resource_name = "keywords"
-        fields = ['id', 'title']
-        list_allowed_methods = ['get',]
-        detail_allowed_methods = ['get',]
-        limit = 0
-        cache = SimpleCache()
-        throttle = CacheDBThrottle()
-        filtering = {
-            'title': ('exact',),
-        }
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
-
-
-
-class AssignedKeywordResource(ModelResource):
-    assignments = fields.ToOneField('mezzanine_recipes.api.KeywordResource', 'keyword', full=True)
-
-    class Meta:
-        queryset = AssignedKeyword.objects.all()
-        resource_name = "assigned_keywords"
-        fields = ['id', '_order',]
-        list_allowed_methods = ['get',]
-        detail_allowed_methods = ['get',]
-        cache = SimpleCache()
-        throttle = CacheDBThrottle()
-        filtering = {
-            'object_pk': ('exact',),
-        }
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
 
 
 
@@ -113,8 +116,7 @@ class BlogPostResource(ModelResource):
         filtering = {
             "publish_date": ('gt',),
         }
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def override_urls(self):
         return [
@@ -167,8 +169,7 @@ class RecipeResource(ModelResource):
         filtering = {
             "publish_date": ('gt',),
         }
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def dehydrate_difficulty(self, bundle):
         return dict(DIFFICULTIES)[bundle.data['difficulty']]
@@ -220,8 +221,7 @@ class PostResource(ModelResource):
         filtering = {
             "publish_date": ('gt',),
         }
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def dehydrate(self, bundle):
         if isinstance(bundle.obj, BlogPost):
@@ -269,7 +269,7 @@ class PostResource(ModelResource):
 
 class CommentResource(ModelResource):
     replied_to = fields.ToOneField('mezzanine_recipes.api.CommentResource', 'replied_to', null=True)
-    content_object = GenericForeignKeyField({
+    post = GenericForeignKeyField({
         BlogProxy: PostResource,
         BlogPost: BlogPostResource,
         Recipe: RecipeResource
@@ -286,8 +286,7 @@ class CommentResource(ModelResource):
         filtering = {
             'object_pk': ('exact',),
             }
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
         authorization = Authorization()
 
     def dehydrate_user_email(self, bundle):
@@ -295,6 +294,71 @@ class CommentResource(ModelResource):
 
     def dehydrate_user_url(self, bundle):
         return None
+
+
+
+class RatingResource(ModelResource):
+    post = GenericForeignKeyField({
+        BlogProxy: PostResource,
+        BlogPost: BlogPostResource,
+        Recipe: RecipeResource
+    }, 'content_object')
+
+    class Meta:
+        queryset = Rating.objects.all()
+        resource_name = "rating"
+        fields = ['id', 'value',]
+        list_allowed_methods = ['get', 'post',]
+        detail_allowed_methods = ['get',]
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            'object_pk': ('exact',),
+            }
+        serializer = CamelCaseJSONSerializer()
+        authorization = Authorization()
+
+
+
+class KeywordResource(ModelResource):
+    keyword = fields.ToManyField('mezzanine_recipes.api.AssignedKeywordResource', 'assignments')
+
+    class Meta:
+        queryset = Keyword.objects.all()
+        resource_name = "keywords"
+        fields = ['id', 'title']
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        limit = 0
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            'title': ('exact',),
+            }
+        serializer = CamelCaseJSONSerializer()
+
+
+
+class AssignedKeywordResource(ModelResource):
+    assignments = fields.ToOneField('mezzanine_recipes.api.KeywordResource', 'keyword', full=True)
+    post = GenericForeignKeyField({
+        BlogProxy: PostResource,
+        BlogPost: BlogPostResource,
+        Recipe: RecipeResource
+    }, 'content_object')
+
+    class Meta:
+        queryset = AssignedKeyword.objects.all()
+        resource_name = "assigned_keywords"
+        fields = ['id', '_order',]
+        list_allowed_methods = ['get',]
+        detail_allowed_methods = ['get',]
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            'object_pk': ('exact',),
+            }
+        serializer = CamelCaseJSONSerializer()
 
 
 
@@ -310,8 +374,7 @@ class IngredientResource(ModelResource):
         limit = 0
         cache = SimpleCache()
         throttle = CacheDBThrottle()
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return Ingredient.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -334,8 +397,7 @@ class WorkingHoursResource(ModelResource):
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return WorkingHours.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -355,8 +417,7 @@ class CookingTimeResource(ModelResource):
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return CookingTime.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -376,8 +437,7 @@ class RestPeriodResource(ModelResource):
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
         throttle = CacheDBThrottle()
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
+        serializer = CamelCaseJSONSerializer()
 
     def get_object_list(self, request, *args, **kwargs):
         return RestPeriod.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
