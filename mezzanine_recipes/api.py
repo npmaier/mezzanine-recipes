@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import url
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.contenttypes.models import ContentType
 from django.core.paginator import Paginator, InvalidPage
 from django.db.models import Q
 from django.http import Http404
@@ -18,6 +19,8 @@ from tastypie.cache import SimpleCache
 from tastypie.throttle import CacheDBThrottle
 from tastypie.utils import trailing_slash
 from tastypie.serializers import Serializer
+from tastypie.authorization import Authorization
+from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 
 from .models import BlogProxy, Recipe, BlogPost, Ingredient, WorkingHours, CookingTime, RestPeriod
 from .fields import DIFFICULTIES, UNITS
@@ -54,23 +57,6 @@ class CategoryResource(ModelResource):
                                            Q(blogposts__expiry_date__gte=now()) | Q(blogposts__expiry_date__isnull=True),
                                            Q(blogposts__status=CONTENT_STATUS_PUBLISHED)).distinct()
 
-
-
-class CommentResource(ModelResource):
-    class Meta:
-        queryset = ThreadedComment.objects.visible()
-        resource_name = "comments"
-        fields = ['id', 'comment', 'submit_date', 'user_name',]
-        list_allowed_methods = ['get',]
-        detail_allowed_methods = ['get',]
-        limit = 0
-        cache = SimpleCache()
-        throttle = CacheDBThrottle()
-        filtering = {
-            'object_pk': ('exact',),
-        }
-        if settings.DEBUG:
-            serializer = PrettyJSONSerializer()
 
 
 
@@ -278,6 +264,37 @@ class PostResource(ModelResource):
 
         self.log_throttled_access(request)
         return self.create_response(request, object_list)
+
+
+
+class CommentResource(ModelResource):
+    replied_to = fields.ToOneField('mezzanine_recipes.api.CommentResource', 'replied_to', null=True)
+    content_object = GenericForeignKeyField({
+        BlogProxy: PostResource,
+        BlogPost: BlogPostResource,
+        Recipe: RecipeResource
+    }, 'content_object')
+
+    class Meta:
+        queryset = ThreadedComment.objects.visible()
+        resource_name = "comments"
+        fields = ['id', 'comment', 'submit_date', 'user_name', 'user_email', 'user_url', 'replied_to',]
+        list_allowed_methods = ['get', 'post',]
+        detail_allowed_methods = ['get',]
+        cache = SimpleCache()
+        throttle = CacheDBThrottle()
+        filtering = {
+            'object_pk': ('exact',),
+            }
+        if settings.DEBUG:
+            serializer = PrettyJSONSerializer()
+        authorization = Authorization()
+
+    def dehydrate_user_email(self, bundle):
+        return None
+
+    def dehydrate_user_url(self, bundle):
+        return None
 
 
 
