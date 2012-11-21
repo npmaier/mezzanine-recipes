@@ -108,7 +108,7 @@ class BlogPostResource(ModelResource):
     class Meta:
         queryset = BlogPost.objects.published().order_by('-publish_date')
         resource_name = "blog"
-        fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count',]
+        fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count', 'modified_date',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
@@ -161,7 +161,7 @@ class RecipeResource(ModelResource):
     class Meta:
         queryset = Recipe.objects.published().order_by('-publish_date')
         resource_name = "recipe"
-        fields = ['id', 'title', 'featured_image', 'summary', 'description', 'portions', 'difficulty', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count',]
+        fields = ['id', 'title', 'featured_image', 'summary', 'description', 'portions', 'difficulty', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count', 'modified_date',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
@@ -213,7 +213,7 @@ class PostResource(ModelResource):
     class Meta:
         queryset = BlogProxy.secondary.published().order_by('-publish_date')
         resource_name = "post"
-        fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count',]
+        fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count', 'modified_date',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()

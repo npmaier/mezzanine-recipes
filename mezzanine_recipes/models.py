@@ -6,6 +6,7 @@ from django.contrib.contenttypes.models import ContentType
 from mezzanine.core.models import Orderable
 from mezzanine.core.managers import DisplayableManager
 from mezzanine.blog.models import BlogPost as MezzanineBlogPost
+from mezzanine.utils.timezone import now
 
 from . import fields
 
@@ -32,15 +33,17 @@ class BlogManager(DisplayableManager):
 
 class BlogProxy(MezzanineBlogPost):
     content_type = models.ForeignKey(ContentType,editable=False,null=True)
+    modified_date = models.DateTimeField(_("Last Modified"), blank=True, null=True)
 
     template_dir = "blog/"
 
     secondary = BlogManager()
 
     def save(self, *args, **kwargs):
+        self.modified_date = now()
         if not self.content_type:
             self.content_type = ContentType.objects.get_for_model(self.__class__)
-            super(BlogProxy, self).save(*args, **kwargs)
+        super(BlogProxy, self).save(*args, **kwargs)
 
     def as_leaf_class(self):
         content_type = self.content_type
