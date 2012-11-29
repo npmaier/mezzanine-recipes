@@ -36,7 +36,6 @@ class BlogProxy(MezzanineBlogPost):
     modified_date = models.DateTimeField(_("Last Modified"), blank=True, null=True)
 
     template_dir = "blog/"
-
     secondary = BlogManager()
 
     def save(self, *args, **kwargs):
@@ -72,9 +71,7 @@ class Recipe(BlogProxy):
     source = models.URLField(_("Source"), blank=True, null=True, help_text=_("URL of the source recipe"))
 
     template_dir = "recipe/"
-
     secondary = BlogManager()
-
     search_fields = ("title", "summary", "description",)
 
     def __unicode__(self):

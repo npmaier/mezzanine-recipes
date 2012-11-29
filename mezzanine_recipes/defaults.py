@@ -1,5 +1,5 @@
 """
-Default settings for the ``mezzanine.blog`` app. Each of these can be
+Default settings for the ``mezzanine_recipe`` app. Each of these can be
 overridden in your project's settings module, just like regular
 Django settings. The ``editable`` argument for each controls whether
 the setting is editable via Django's admin.
@@ -28,8 +28,22 @@ register_setting(
 )
 
 register_setting(
-    name="BLOG_USE_FEATURED_IMAGE",
-    description=_("Enable featured images in recipes"),
+    name="BLOG_SLUG",
+    description=_("Slug of the page object for the blog."),
     editable=False,
-    default=False,
+    default="blog",
+)
+
+register_setting(
+    name="RECIPES_SLUG",
+    description=_("Slug of the page object for the blog."),
+    editable=False,
+    default="recipes",
+)
+
+register_setting(
+    name="ARTICLES_SLUG",
+    description=_("Slug of the page object for the blog."),
+    editable=False,
+    default="articles",
 )

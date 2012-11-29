@@ -1,13 +1,13 @@
 # mezzanine-recipes
 
-This plugin gives you a "Recipe" page type for your Mezzanine sites.
+This plugin gives you a "Recipe" blog type for your Mezzanine sites.
 
 ## Features
 
 * Show your visitors what to cook
 	* Embed an image of the meal
 	* Provide an ingredient list
-* Let your visitors add a comment to recipes
+* Let your visitors add a comment and rating to recipes
 * The usual stuff - ingredients, times, categories
 * REST-API for external applications
 
@@ -16,9 +16,10 @@ This plugin gives you a "Recipe" page type for your Mezzanine sites.
 * Run `pip install https://github.com/tjetzinger/mezzanine-recipes/tarball/master` (or, if you want to hack on mezzanine-recipes, clone it and run `pip install -e path/to/repo`)
 * Add `"mezzanine_recipes"` to your `INSTALLED_APPS`
 * Migrate your database
-* To enable REST API put following code to your urls.py:
+* To enable Recipe-Blog and REST API put following code to your urls.py:
 
 ```python
+from mezzanine.conf import settings
 from tastypie.api import Api
 from mezzanine_recipes.api import *
 
@@ -32,33 +33,33 @@ v1_api.register(RestPeriodResource())
 v1_api.register(CommentResource())
 
 urlpatterns = patterns("",
-    (r'^api/', include(v1_api.urls)),
+    ("^api/", include(v1_api.urls)),
+    ("^%s/" % settings.BLOG_SLUG, include("mezzanine_recipes.urls")),
     ...
 ```
 
 ## Usage
 
-mezzanine-recipe provides the page type "Recipe". It is the 'Recipe' page on your website. The Recipe page type represents a single recipe.
+mezzanine-recipe provides the blogpost type "Recipe". It is the 'Recipe' blog on your website. The Recipe blog type represents a single recipe.
 
-Create an Recipe page in the Mezzanine admin (naming it something like "Recipe").
+Create a Recipe blog in the Mezzanine admin (naming it something like "Recipe").
 
 ## Creating Templates
 
 ### Recipe page
 
-The template for an Recipe page is `templates/pages/recipe.html`.
+The template for an Recipe page is `templates/recipe/blog_post_detail.html`.
 
-The Recipe object is available at `page.recipe`. It has the following properties:
+The Recipe object is available at `mezzanine_recipes.recipe`. It has the following properties:
 
 * Periods and times: `WorkingHours`, `CookingTime`, `RestPeriod`
 * Cooking info: `ingredients`, `portions`, `difficulty`, `categories`
-* Text data: `title`, `summary`, `content`, `comments`
+* Text data: `title`, `summary`, `content`, `comments`, `ratings`
 
 ## To Do
 
-* Let visitors add a rating to recipes
-* Extend REST API to a PUT Method for CommentResource
 * Add some tests
+* Extend to Recipe type single steps
 
 ## License
 

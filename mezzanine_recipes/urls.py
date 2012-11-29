@@ -1,7 +1,13 @@
 from django.conf.urls.defaults import patterns, url
 
+from mezzanine.conf import settings
+
+
 # Blog patterns.
 urlpatterns = patterns("mezzanine_recipes.views",
+    url("^%s/$" % settings.RECIPES_SLUG, "blog_post_list_recipe", name="blog_post_list"),
+    url("^%s/$" % settings.ARTICLES_SLUG, "blog_post_list_article", name="blog_post_list"),
+
     url("^feeds/(?P<format>.*)/$", "blog_post_feed", name="blog_post_feed"),
     url("^tag/(?P<tag>.*)/feeds/(?P<format>.*)/$", "blog_post_feed",
         name="blog_post_feed_tag"),

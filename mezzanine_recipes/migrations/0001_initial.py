@@ -12,6 +12,7 @@ class Migration(SchemaMigration):
         db.create_table('mezzanine_recipes_blogproxy', (
             ('blogpost_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['blog.BlogPost'], unique=True, primary_key=True)),
             ('content_type', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contenttypes.ContentType'], null=True)),
+            ('modified_date', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
         ))
         db.send_create_signal('mezzanine_recipes', ['BlogProxy'])
 
@@ -151,6 +152,7 @@ class Migration(SchemaMigration):
             'rating': ('mezzanine.generic.fields.RatingField', [], {'object_id_field': "'object_pk'", 'to': "orm['generic.Rating']", 'frozen_by_south': 'True'}),
             'rating_average': ('django.db.models.fields.FloatField', [], {'default': '0'}),
             'rating_count': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
+            'related_posts': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'related_posts_rel_+'", 'blank': 'True', 'to': "orm['blog.BlogPost']"}),
             'short_url': ('django.db.models.fields.URLField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
             'site': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['sites.Site']"}),
             'slug': ('django.db.models.fields.CharField', [], {'max_length': '2000', 'null': 'True', 'blank': 'True'}),
@@ -216,7 +218,8 @@ class Migration(SchemaMigration):
         'mezzanine_recipes.blogproxy': {
             'Meta': {'ordering': "('-publish_date',)", 'object_name': 'BlogProxy', '_ormbases': ['blog.BlogPost']},
             'blogpost_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': "orm['blog.BlogPost']", 'unique': 'True', 'primary_key': 'True'}),
-            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']", 'null': 'True'})
+            'content_type': ('django.db.models.fields.related.ForeignKey', [], {'to': "orm['contenttypes.ContentType']", 'null': 'True'}),
+            'modified_date': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'})
         },
         'mezzanine_recipes.cookingtime': {
             'Meta': {'object_name': 'CookingTime'},
