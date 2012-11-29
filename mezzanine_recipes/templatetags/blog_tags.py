@@ -4,11 +4,11 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.db.models import Count
 
-#from mezzanine.blog.forms import BlogPostForm
-from mezzanine.blog.models import BlogPost, BlogCategory
+from mezzanine.blog.models import BlogCategory
 from mezzanine import template
 
 from mezzanine_recipes.forms import BlogPostForm
+from mezzanine_recipes.models import BlogProxy
 
 
 register = template.Library()
@@ -19,7 +19,7 @@ def blog_months(*args):
     """
     Put a list of dates for blog posts into the template context.
     """
-    dates = BlogPost.objects.published().values_list("publish_date", flat=True)
+    dates = BlogProxy.secondary.published().values_list("publish_date", flat=True)
     date_dicts = [{"date": datetime(d.year, d.month, 1)} for d in dates]
     month_dicts = []
     for date_dict in date_dicts:
@@ -35,7 +35,7 @@ def blog_categories(*args):
     """
     Put a list of categories for blog posts into the template context.
     """
-    posts = BlogPost.objects.published()
+    posts = BlogProxy.secondary.published()
     categories = BlogCategory.objects.filter(blogposts__in=posts)
     return list(categories.annotate(post_count=Count("blogposts")))
 
@@ -45,7 +45,7 @@ def blog_authors(*args):
     """
     Put a list of authors (users) for blog posts into the template context.
     """
-    blog_posts = BlogPost.objects.published()
+    blog_posts = BlogProxy.secondary.published()
     authors = User.objects.filter(blogposts__in=blog_posts)
     return list(authors.annotate(post_count=Count("blogposts")))
 
@@ -55,7 +55,7 @@ def blog_recent_posts(limit=5):
     """
     Put a list of recently published blog posts into the template context.
     """
-    return list(BlogPost.objects.published()[:limit])
+    return list(BlogProxy.secondary.published()[:limit])
 
 
 @register.inclusion_tag("admin/includes/quick_blog.html", takes_context=True)

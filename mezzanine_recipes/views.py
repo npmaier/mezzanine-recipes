@@ -34,7 +34,7 @@ def blog_post_list(request, model=BlogProxy, tag=None, year=None, month=None, us
     """
     settings.use_editable()
     templates = []
-    blog_posts = model.objects.published(for_user=request.user)
+    blog_posts = model.secondary.published(for_user=request.user)
     if tag is not None:
         tag = get_object_or_404(Keyword, slug=tag)
         blog_posts = blog_posts.filter(keywords__in=tag.assignments.all())
