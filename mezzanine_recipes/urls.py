@@ -5,6 +5,10 @@ from mezzanine.conf import settings
 
 # Blog patterns.
 urlpatterns = patterns("mezzanine_recipes.views",
+    url("^%s/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<slug>.*)/$" % settings.RECIPES_SLUG, "blog_post_detail", name="blog_post_detail_date"),
+    url("^%s/(?P<slug>.*)/$" % settings.RECIPES_SLUG, "blog_post_detail", name="blog_post_detail"),
+    url("^%s/(?P<year>\d{4})/(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<slug>.*)/$" % settings.ARTICLES_SLUG, "blog_post_detail", name="blog_post_detail_date"),
+    url("^%s/(?P<slug>.*)/$" % settings.ARTICLES_SLUG, "blog_post_detail", name="blog_post_detail"),
     url("^%s/$" % settings.RECIPES_SLUG, "blog_post_list_recipe", name="blog_post_list"),
     url("^%s/$" % settings.ARTICLES_SLUG, "blog_post_list_article", name="blog_post_list"),
 

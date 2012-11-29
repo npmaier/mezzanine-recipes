@@ -28,13 +28,6 @@ register_setting(
 )
 
 register_setting(
-    name="BLOG_SLUG",
-    description=_("Slug of the page object for the blog."),
-    editable=False,
-    default="blog",
-)
-
-register_setting(
     name="RECIPES_SLUG",
     description=_("Slug of the page object for the blog."),
     editable=False,

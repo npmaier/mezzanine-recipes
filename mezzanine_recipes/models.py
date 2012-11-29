@@ -3,6 +3,7 @@ from django.db.models.query import QuerySet
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.contenttypes.models import ContentType
 
+from mezzanine.conf import settings
 from mezzanine.core.models import Orderable
 from mezzanine.core.managers import DisplayableManager
 from mezzanine.blog.models import BlogPost as MezzanineBlogPost
@@ -51,9 +52,47 @@ class BlogProxy(MezzanineBlogPost):
             return self
         return model.objects.get(id=self.id)
 
+    def _get_next_or_previous_by_publish_date(self, is_next, **kwargs):
+        """
+        Retrieves next or previous object by publish date. We implement
+        our own version instead of Django's so we can hook into the
+        published manager and concrete subclasses.
+        """
+        arg = "publish_date__gt" if is_next else "publish_date__lt"
+        order = "publish_date" if is_next else "-publish_date"
+        lookup = {arg: self.publish_date}
+        concrete_model = self.__class__
+        try:
+            queryset = concrete_model.secondary.published
+        except AttributeError:
+            queryset = concrete_model.secondary.all
+        try:
+            return queryset(**kwargs).filter(**lookup).order_by(order)[0]
+        except IndexError:
+            pass
+
 
 class BlogPost(BlogProxy):
     secondary = BlogManager()
+
+    @models.permalink
+    def get_absolute_url(self):
+        url_name = "blog_post_detail"
+        kwargs = {"slug": "%s/%s" % (settings.ARTICLES_SLUG, self.slug)}
+        if settings.BLOG_URLS_USE_DATE:
+            url_name = "blog_post_detail_date"
+            month = str(self.publish_date.month)
+            if len(month) == 1:
+                month = "0" + month
+            day = str(self.publish_date.day)
+            if len(day) == 1:
+                day = "0" + day
+            kwargs.update({
+                "day": day,
+                "month": month,
+                "year": self.publish_date.year,
+                })
+        return (url_name, (), kwargs)
 
     class Meta:
         verbose_name = _("Blog post")
@@ -76,6 +115,25 @@ class Recipe(BlogProxy):
 
     def __unicode__(self):
         return u'%s' % (self.title)
+
+    @models.permalink
+    def get_absolute_url(self):
+        url_name = "blog_post_detail"
+        kwargs = {"slug": "%s/%s" % (settings.RECIPES_SLUG, self.slug)}
+        if settings.BLOG_URLS_USE_DATE:
+            url_name = "blog_post_detail_date"
+            month = str(self.publish_date.month)
+            if len(month) == 1:
+                month = "0" + month
+            day = str(self.publish_date.day)
+            if len(day) == 1:
+                day = "0" + day
+            kwargs.update({
+                "day": day,
+                "month": month,
+                "year": self.publish_date.year,
+                })
+        return (url_name, (), kwargs)
 
     class Meta:
         verbose_name = _("Recipe")
