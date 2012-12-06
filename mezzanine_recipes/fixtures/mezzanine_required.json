@@ -1,0 +1,50 @@
+[
+    {
+        "pk": 9,
+        "model": "pages.page",
+        "fields": {
+            "status": 2,
+            "_order": 1,
+            "parent": 1,
+            "description": "Recipes",
+            "title": "Recipe",
+            "titles": "Recipes",
+            "content_model": "richtextpage",
+            "in_menus": [1, 2, 3],
+            "slug": "blog/recipes",
+            "site": 1
+        }
+    },
+    {
+        "pk": 10,
+        "model": "pages.page",
+        "fields": {
+            "status": 2,
+            "_order": 1,
+            "parent": 1,
+            "description": "Articles",
+            "title": "Article",
+            "titles": "Articles",
+            "content_model": "richtextpage",
+            "in_menus": [1, 2, 3],
+            "slug": "blog/articles",
+            "site": 1
+        }
+    },
+
+    {
+        "pk": 9,
+        "model": "pages.richtextpage",
+        "fields": {
+            "content": "<p>Recipes</p>"
+        }
+    },
+    {
+        "pk": 10,
+        "model": "pages.richtextpage",
+        "fields": {
+            "content": "<p>Articles</p>"
+        }
+    }
+]
+
