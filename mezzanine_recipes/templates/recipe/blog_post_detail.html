@@ -27,7 +27,7 @@
 
     {% block recipe_ingredients %}
     {% if blog_post.ingredients.count %}
-        <dl class="dl-horizontal">
+        <dl class="dl-horizontal ingredients">
             <h4><dt>{% trans 'Ingredients' %}:</dt></h4>
             {% for ingredient in blog_post.ingredients.all %}
                 <dd>{{ ingredient.quantity }} {% get_unit_name ingredient %} {{ ingredient }} {{ ingredient.note }}</dd>
