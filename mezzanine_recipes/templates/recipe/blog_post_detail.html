@@ -1,6 +1,6 @@
 {% overextends "blog/blog_post_detail.html" %}
 
-{% load mezzanine_tags recipe_tags i18n %}
+{% load mezzanine_tags i18n %}
 
 {% block blog_post_detail_featured_image %}
     {% if blog_post.featured_image %}
@@ -30,7 +30,7 @@
         <dl class="dl-horizontal ingredients">
             <h4><dt>{% trans 'Ingredients' %}:</dt></h4>
             {% for ingredient in blog_post.ingredients.all %}
-                <dd>{{ ingredient.quantity }} {% get_unit_name ingredient %} {{ ingredient }} {{ ingredient.note }}</dd>
+                <dd>{{ ingredient }}</dd>
             {% endfor %}
         </dl>
     {% endif %}
@@ -52,7 +52,7 @@
         {% editable blog_post.difficulty %}
             <dl class="dl-horizontal">
                 <h4><dt>{% trans 'Difficulty' %}:</dt></h4>
-                <dd>{% get_difficulty_name blog_post %}</dd>
+                <dd>{{ blog_post.get_difficulty_display }}</dd>
             </dl>
         {% endeditable %}
     {% endif %}
@@ -62,7 +62,7 @@
     {% if blog_post.working_hours %}
         <dl class="dl-horizontal">
             <h4><dt>{% trans 'Working Hours' %}:</dt></h4>
-            <dd>{% get_time_period blog_post.working_hours %} {% trans 'Hours' %}</dd>
+            <dd>{{ blog_post.working_hours }} {% trans 'Hours' %}</dd>
         </dl>
     {% endif %}
     {% endblock %}
@@ -71,7 +71,7 @@
     {% if blog_post.cooking_time %}
         <dl class="dl-horizontal">
             <h4><dt>{% trans 'Cooking Time' %}:</dt></h4>
-            <dd>{% get_time_period blog_post.cooking_time %} {% trans 'Hours' %}</dd>
+            <dd>{{ blog_post.cooking_time }} {% trans 'Hours' %}</dd>
         </dl>
     {% endif %}
     {% endblock %}
@@ -80,7 +80,7 @@
     {% if blog_post.rest_period %}
         <dl class="dl-horizontal">
             <h4><dt>{% trans 'Rest Period' %}:</dt></h4>
-            <dd>{% get_time_period blog_post.rest_period %} {% trans 'Days' %}</dd>
+            <dd>{{ blog_post.rest_period }} {% trans 'Days' %}</dd>
         </dl>
     {% endif %}
     {% endblock %}

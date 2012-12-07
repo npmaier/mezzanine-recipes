@@ -153,7 +153,18 @@ class Ingredient(Orderable):
     note = models.CharField(_("Note"), max_length=200, blank=True, null=True)
 
     def __unicode__(self):
-        return u'%s' % (self.ingredient)
+        _ingredient = u'%s' % (self.ingredient)
+
+        if self.unit:
+            _ingredient = u'%s %s' % (self.get_unit_display(), _ingredient)
+
+        if self.quantity:
+            _ingredient = u'%s %s' % (self.quantity, _ingredient)
+
+        if len(self.note):
+           _ingredient = u'%s - %s' % (_ingredient, self.note)
+
+        return _ingredient
 
     class Meta:
         verbose_name = _("Ingredient")
@@ -166,6 +177,9 @@ class Period(models.Model):
     """
     hours = models.IntegerField(_("hours"), default=0)
     minutes = models.IntegerField(_("minutes"), default=0)
+
+    def __unicode__(self):
+        return "%02d:%02d" %(self.hours, self.minutes)
 
     class Meta:
         abstract = True
@@ -199,6 +213,10 @@ class RestPeriod(Period):
     """
     recipe = models.OneToOneField("Recipe", verbose_name=_("Recipe"), related_name="rest_period")
     days = models.IntegerField(_("days"), default=0)
+
+    def __unicode__(self):
+        period = super(RestPeriod, self).__unicode__()
+        return "%02d:%s" %(self.days, period)
 
     class Meta:
         verbose_name = _("rest period")
