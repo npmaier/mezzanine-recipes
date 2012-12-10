@@ -14,8 +14,8 @@ setup(
               if '__init__.py' in i[2]
     ],
     install_requires=[
-        'Mezzanine==1.2.4',
-        'django-tastypie==0.9.12-alpha',
+        #'Mezzanine==1.2.4',
+        #'django-tastypie==0.9.12-alpha',
         'uuid==1.30',
     ],
 )
