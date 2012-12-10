@@ -40,3 +40,13 @@ register_setting(
     editable=False,
     default="articles",
 )
+
+register_setting(
+    name="SEARCH_MODEL_CHOICES",
+    description=_("Sequence of models that will be provided by default as "
+                  "choices in the search form. Each model should be in the format "
+                  "``app_label.model_name``. Only models that subclass "
+                  "``mezzanine.core.models.Displayable`` should be used."),
+    editable=False,
+    default=("mezzanine_recipes.recipe", "mezzanine_recipes.BlogPost"),
+)
