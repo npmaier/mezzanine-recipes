@@ -18,7 +18,8 @@ from tastypie.cache import SimpleCache
 from tastypie.throttle import CacheDBThrottle
 from tastypie.utils import trailing_slash
 from tastypie.serializers import Serializer
-from tastypie.authorization import Authorization
+from tastypie.authentication import ApiKeyAuthentication
+from tastypie.authorization import DjangoAuthorization, ReadOnlyAuthorization
 from tastypie.contrib.contenttypes.fields import GenericForeignKeyField
 
 from .models import BlogProxy, Recipe, BlogPost, Ingredient, WorkingHours, CookingTime, RestPeriod
@@ -94,6 +95,8 @@ class CategoryResource(ModelResource):
         cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def get_object_list(self, request, *args, **kwargs):
         return BlogCategory.objects.filter(Q(blogposts__publish_date__lte=now()) | Q(blogposts__publish_date__isnull=True),
@@ -117,6 +120,8 @@ class BlogPostResource(ModelResource):
             "publish_date": ('gt',),
         }
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def override_urls(self):
         return [
@@ -170,9 +175,14 @@ class RecipeResource(ModelResource):
             "publish_date": ('gt',),
         }
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def dehydrate_difficulty(self, bundle):
-        return dict(DIFFICULTIES)[bundle.data['difficulty']]
+        if bundle.data['difficulty']:
+            return dict(DIFFICULTIES)[bundle.data['difficulty']]
+        else:
+            return None
 
     def override_urls(self):
         return [
@@ -222,6 +232,8 @@ class PostResource(ModelResource):
             "publish_date": ('gt',),
         }
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def dehydrate(self, bundle):
         if isinstance(bundle.obj, BlogPost):
@@ -287,7 +299,8 @@ class CommentResource(ModelResource):
             'object_pk': ('exact',),
             }
         serializer = CamelCaseJSONSerializer()
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = DjangoAuthorization()
 
     def dehydrate_user_email(self, bundle):
         return None
@@ -316,7 +329,8 @@ class RatingResource(ModelResource):
             'object_pk': ('exact',),
             }
         serializer = CamelCaseJSONSerializer()
-        authorization = Authorization()
+        authentication = ApiKeyAuthentication()
+        authorization = DjangoAuthorization()
 
 
 
@@ -336,6 +350,8 @@ class KeywordResource(ModelResource):
             'title': ('exact',),
             }
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
 
 
@@ -359,6 +375,8 @@ class AssignedKeywordResource(ModelResource):
             'object_pk': ('exact',),
             }
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
 
 
@@ -375,6 +393,8 @@ class IngredientResource(ModelResource):
         cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def get_object_list(self, request, *args, **kwargs):
         return Ingredient.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -382,7 +402,10 @@ class IngredientResource(ModelResource):
                                          Q(recipe__status=CONTENT_STATUS_PUBLISHED))
 
     def dehydrate_unit(self, bundle):
-        return dict(UNITS)[bundle.data['unit']]
+        if bundle.data['unit']:
+            return dict(UNITS)[bundle.data['unit']]
+        else:
+            return None
 
 
 
@@ -398,6 +421,8 @@ class WorkingHoursResource(ModelResource):
         cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def get_object_list(self, request, *args, **kwargs):
         return WorkingHours.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -418,6 +443,8 @@ class CookingTimeResource(ModelResource):
         cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def get_object_list(self, request, *args, **kwargs):
         return CookingTime.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
@@ -438,6 +465,8 @@ class RestPeriodResource(ModelResource):
         cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
+        authentication = ApiKeyAuthentication()
+        authorization = ReadOnlyAuthorization()
 
     def get_object_list(self, request, *args, **kwargs):
         return RestPeriod.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
