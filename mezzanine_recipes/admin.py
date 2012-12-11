@@ -19,7 +19,7 @@ blogpost_fieldsets = deepcopy(MezzanineBlogPostAdmin.fieldsets)
 blogpost2_fieldsets = deepcopy(MezzanineBlogPostAdmin.fieldsets)
 blogpost_fieldsets[0][1]["fields"].extend(["summary", "portions", "difficulty", "source"])
 blogpost2_fieldsets[0][1]["fields"].extend(["modified_date"])
-blogpost_fieldsets[0][1]["fields"].insert(-7, "featured_image")
+blogpost_fieldsets[0][1]["fields"].insert(-6, "featured_image")
 recipe_list_display = deepcopy(MezzanineBlogPostAdmin.list_display)
 recipe_list_display.insert(0, "admin_thumb")
 
