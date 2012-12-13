@@ -8,22 +8,17 @@
     {% endif %}
 {% endblock %}
 
-{% block extension_1 %}
-{{ block.super }}
-    {% block recipe_summary %}
-        {% if page.recipe.summary %}
-            <div class="well well-small">
-                {% editable page.recipe.summary %}<h3>{{ page.recipe.summary }}</h3>{% endeditable %}
-            </div>
-        {% endif %}
-    {% endblock %}
-{% endblock %}
-
-
 {% block extension_2 %}
 {{ block.super }}
+
 {% block recipe_hero %}
 <div class="hero-unit">
+
+    {% block recipe_summary %}
+    {% if blog_post.summary %}
+        {% editable blog_post.summary %}<p>{{ blog_post.summary }}</p>{% endeditable %}
+    {% endif %}
+    {% endblock %}
 
     {% block recipe_ingredients %}
     {% if blog_post.ingredients.count %}
