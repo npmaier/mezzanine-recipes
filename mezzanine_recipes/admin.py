@@ -3,11 +3,12 @@ from copy import deepcopy
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django.conf import settings
+#from django.conf import settings
 
 from mezzanine.blog.admin import BlogPostAdmin as MezzanineBlogPostAdmin
 from mezzanine.blog.models import BlogPost as MezzanineBlogPost
 from mezzanine.core.admin import TabularDynamicInlineAdmin
+from mezzanine.conf import settings
 
 from tastypie.admin import ApiKeyInline
 from tastypie.models import ApiAccess
@@ -19,7 +20,8 @@ blogpost_fieldsets = deepcopy(MezzanineBlogPostAdmin.fieldsets)
 blogpost2_fieldsets = deepcopy(MezzanineBlogPostAdmin.fieldsets)
 blogpost_fieldsets[0][1]["fields"].extend(["summary", "portions", "difficulty", "source"])
 blogpost2_fieldsets[0][1]["fields"].extend(["modified_date"])
-blogpost_fieldsets[0][1]["fields"].insert(-6, "featured_image")
+if not settings.BLOG_USE_FEATURED_IMAGE:
+    blogpost_fieldsets[0][1]["fields"].insert(-6, "featured_image")
 recipe_list_display = deepcopy(MezzanineBlogPostAdmin.list_display)
 recipe_list_display.insert(0, "admin_thumb")
 
