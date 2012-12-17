@@ -20,10 +20,11 @@ blogpost_fieldsets = deepcopy(MezzanineBlogPostAdmin.fieldsets)
 blogpost2_fieldsets = deepcopy(MezzanineBlogPostAdmin.fieldsets)
 blogpost_fieldsets[0][1]["fields"].extend(["summary", "portions", "difficulty", "source"])
 blogpost2_fieldsets[0][1]["fields"].extend(["modified_date"])
+recipe_list_display = deepcopy(MezzanineBlogPostAdmin.list_display)
+
 if not settings.BLOG_USE_FEATURED_IMAGE:
     blogpost_fieldsets[0][1]["fields"].insert(-6, "featured_image")
-recipe_list_display = deepcopy(MezzanineBlogPostAdmin.list_display)
-recipe_list_display.insert(0, "admin_thumb")
+    recipe_list_display.insert(0, "admin_thumb")
 
 class WorkingHoursInline(admin.TabularInline):
     model = WorkingHours
