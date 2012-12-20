@@ -4,7 +4,7 @@
 
 {% block blog_post_detail_featured_image %}
     {% if blog_post.featured_image %}
-        <p><img src="{{ MEDIA_URL }}{% thumbnail blog_post.featured_image 720 0 %}"></p>
+        <p><img class="img-polaroid" src="{{ MEDIA_URL }}{% thumbnail blog_post.featured_image 720 0 %}"></p>
     {% endif %}
 {% endblock %}
 
