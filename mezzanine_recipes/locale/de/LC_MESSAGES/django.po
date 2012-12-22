@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-12-07 17:49+0100\n"
+"POT-Creation-Date: 2012-12-22 18:51+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 
-#: api.py:136 api.py:192 api.py:252
+#: api.py:141 api.py:202 api.py:264
 msgid "Sorry, no results on that page."
 msgstr ""
 
@@ -48,6 +48,13 @@ msgstr ""
 
 #: defaults.py:32 defaults.py:39
 msgid "Slug of the page object for the blog."
+msgstr ""
+
+#: defaults.py:46
+msgid ""
+"Sequence of models that will be provided by default as choices in the search "
+"form. Each model should be in the format ``app_label.model_name``. Only "
+"models that subclass ``mezzanine.core.models.Displayable`` should be used."
 msgstr ""
 
 #: fields.py:10
@@ -478,11 +485,11 @@ msgstr ""
 msgid "Summary"
 msgstr "Kurzbeschreibung"
 
-#: models.py:108 templates/recipe/blog_post_detail.html:43
+#: models.py:108 templates/recipe/blog_post_detail.html:38
 msgid "Portions"
 msgstr "Portionen"
 
-#: models.py:109 templates/recipe/blog_post_detail.html:54
+#: models.py:109 templates/recipe/blog_post_detail.html:49
 msgid "Difficulty"
 msgstr "Schwierigkeit"
 
@@ -518,7 +525,7 @@ msgstr "Zutat"
 msgid "Note"
 msgstr "Anmerkung"
 
-#: models.py:171 templates/recipe/blog_post_detail.html:31
+#: models.py:171 templates/recipe/blog_post_detail.html:26
 msgid "Ingredients"
 msgstr "Zutaten"
 
@@ -559,35 +566,124 @@ msgstr ""
 msgid "Save Draft"
 msgstr ""
 
-#: templates/recipe/blog_post_detail.html:64
+#: templates/blog/blog_post_detail.html:29
+msgid "Posted by"
+msgstr ""
+
+#: templates/blog/blog_post_detail.html:33
+#, python-format
+msgid "%(sometime)s ago"
+msgstr ""
+
+#: templates/blog/blog_post_detail.html:43
+#, fuzzy
+msgid "Comments"
+msgstr "Kommentare erlauben"
+
+#: templates/blog/blog_post_detail.html:46
+#, fuzzy, python-format
+msgid "1 comment"
+msgid_plural "%(comments_count)s comments"
+msgstr[0] "Kommentare erlauben"
+msgstr[1] "Kommentare erlauben"
+
+#: templates/blog/blog_post_detail.html:78
+msgid "Tags"
+msgstr ""
+
+#: templates/blog/blog_post_detail.html:91
+msgid "Share on Twitter"
+msgstr ""
+
+#: templates/blog/blog_post_detail.html:92
+msgid "Share on Facebook"
+msgstr ""
+
+#: templates/blog/blog_post_detail.html:119
+msgid "Related posts"
+msgstr ""
+
+#: templates/recipe/blog_post_detail.html:59
 msgid "Working Hours"
 msgstr "Arbeitszeit"
 
-#: templates/recipe/blog_post_detail.html:65
-#: templates/recipe/blog_post_detail.html:74
-msgid "Hours"
-msgstr "Stunden"
+#: templates/recipe/blog_post_detail.html:62
+#: templates/recipe/blog_post_detail.html:85
+#: templates/recipe/blog_post_detail.html:116
+#, python-format
+msgid ""
+"\n"
+"                        %(hours)s Hour\n"
+"                    "
+msgid_plural ""
+"\n"
+"                        %(hours)s Hours\n"
+"                    "
+msgstr[0] ""
+          "\n"
+          "                        %(hours)s Stunde\n"
+          "                    "
+msgstr[1] ""
+          "\n"
+          "                        %(hours)s Stunden\n"
+          "                    "
 
-#: templates/recipe/blog_post_detail.html:73
+#: templates/recipe/blog_post_detail.html:69
+#: templates/recipe/blog_post_detail.html:92
+#: templates/recipe/blog_post_detail.html:123
+#, python-format
+msgid ""
+"\n"
+"                    %(minutes)s Minute\n"
+"                "
+msgid_plural ""
+"\n"
+"                    %(minutes)s Minutes\n"
+"                "
+msgstr[0] ""
+          "\n"
+          "                    %(minutes)s Minute\n"
+          "                "
+msgstr[1] ""
+          "\n"
+          "                    %(minutes)s Minuten\n"
+          "                "
+
+#: templates/recipe/blog_post_detail.html:82
 msgid "Cooking Time"
 msgstr "Kochzeit"
 
-#: templates/recipe/blog_post_detail.html:82
+#: templates/recipe/blog_post_detail.html:105
 msgid "Rest Period"
 msgstr "Ruhezeit"
 
-#: templates/recipe/blog_post_detail.html:83
-msgid "Days"
-msgstr ""
+#: templates/recipe/blog_post_detail.html:108
+#, python-format
+msgid ""
+"\n"
+"                        %(days)s Day\n"
+"                    "
+msgid_plural ""
+"\n"
+"                        %(days)s Days\n"
+"                    "
+msgstr[0] ""
+          "\n"
+          "                        %(days)s Tag\n"
+          "                    "
+msgstr[1] ""
+          "\n"
+          "                        %(days)s Tage\n"
+          "                    "
+
+#~ msgid "Hours"
+#~ msgstr "Stunden"
 
 #~ msgid "Cover Image"
 #~ msgstr "Abbildung"
 
 #~ msgid "Categories"
 #~ msgstr "Kategorien"
-
-#~ msgid "Allow comments"
-#~ msgstr "Kommentare erlauben"
 
 #~ msgid "Recipe Category"
 #~ msgstr "Rezept Kategorie"

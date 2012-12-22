@@ -57,7 +57,21 @@
     {% if blog_post.working_hours %}
         <dl class="dl-horizontal">
             <h4><dt>{% trans 'Working Hours' %}:</dt></h4>
-            <dd>{{ blog_post.working_hours }} {% trans 'Hours' %}</dd>
+            <dd>
+                {% if blog_post.working_hours.hours %}
+                    {% blocktrans count hours=blog_post.working_hours.hours %}
+                        {{ hours }} Hour
+                    {% plural %}
+                        {{ hours }} Hours
+                    {% endblocktrans %}
+                {% endif %}
+
+                {% blocktrans count minutes=blog_post.working_hours.minutes %}
+                    {{ minutes }} Minute
+                {% plural %}
+                    {{ minutes }} Minutes
+                {% endblocktrans %}
+            </dd>
         </dl>
     {% endif %}
     {% endblock %}
@@ -66,7 +80,21 @@
     {% if blog_post.cooking_time %}
         <dl class="dl-horizontal">
             <h4><dt>{% trans 'Cooking Time' %}:</dt></h4>
-            <dd>{{ blog_post.cooking_time }} {% trans 'Hours' %}</dd>
+            <dd>
+                {% if blog_post.cooking_time.hours %}
+                    {% blocktrans count hours=blog_post.cooking_time.hours %}
+                        {{ hours }} Hour
+                    {% plural %}
+                        {{ hours }} Hours
+                    {% endblocktrans %}
+                {% endif %}
+
+                {% blocktrans count minutes=blog_post.cooking_time.minutes %}
+                    {{ minutes }} Minute
+                {% plural %}
+                    {{ minutes }} Minutes
+                {% endblocktrans %}
+            </dd>
         </dl>
     {% endif %}
     {% endblock %}
@@ -75,7 +103,29 @@
     {% if blog_post.rest_period %}
         <dl class="dl-horizontal">
             <h4><dt>{% trans 'Rest Period' %}:</dt></h4>
-            <dd>{{ blog_post.rest_period }} {% trans 'Days' %}</dd>
+            <dd>
+                {% if blog_post.rest_period.days %}
+                    {% blocktrans count days=blog_post.rest_period.days %}
+                        {{ days }} Day
+                    {% plural %}
+                        {{ days }} Days
+                    {% endblocktrans %}
+                {% endif %}
+
+                {% if blog_post.rest_period.hours %}
+                    {% blocktrans count hours=blog_post.rest_period.hours %}
+                        {{ hours }} Hour
+                    {% plural %}
+                        {{ hours }} Hours
+                    {% endblocktrans %}
+                {% endif %}
+
+                {% blocktrans count minutes=blog_post.rest_period.minutes %}
+                    {{ minutes }} Minute
+                {% plural %}
+                    {{ minutes }} Minutes
+                {% endblocktrans %}
+            </dd>
         </dl>
     {% endif %}
     {% endblock %}
