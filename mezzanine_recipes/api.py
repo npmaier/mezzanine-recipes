@@ -7,6 +7,7 @@ from django.db.models import Q
 from django.http import Http404
 from django.utils import simplejson
 
+
 from mezzanine.generic.models import ThreadedComment, AssignedKeyword, Keyword, Rating
 from mezzanine.blog.models import BlogCategory
 from mezzanine.core.models import CONTENT_STATUS_PUBLISHED
@@ -122,6 +123,7 @@ class BlogPostResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
         authorization = ReadOnlyAuthorization()
+        limit = 5
 
     def override_urls(self):
         return [
@@ -177,6 +179,7 @@ class RecipeResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
         authorization = ReadOnlyAuthorization()
+        limit = 5
 
     def dehydrate_difficulty(self, bundle):
         if bundle.data['difficulty']:
@@ -218,7 +221,7 @@ class RecipeResource(ModelResource):
 
 
 class PostResource(ModelResource):
-    #categories = fields.ToManyField('mezzanine_recipes.api.CategoryResource', 'categories', full=True)
+    categories = fields.ToManyField('mezzanine_recipes.api.CategoryResource', 'categories', full=True)
 
     class Meta:
         queryset = BlogProxy.secondary.published().order_by('-publish_date')
@@ -234,6 +237,7 @@ class PostResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
         authorization = ReadOnlyAuthorization()
+        limit = 5
 
     def dehydrate(self, bundle):
         if isinstance(bundle.obj, BlogPost):
@@ -281,7 +285,7 @@ class PostResource(ModelResource):
 
 class CommentResource(ModelResource):
     replied_to = fields.ToOneField('mezzanine_recipes.api.CommentResource', 'replied_to', null=True)
-    post = GenericForeignKeyField({
+    content_object = GenericForeignKeyField({
         BlogProxy: PostResource,
         BlogPost: BlogPostResource,
         Recipe: RecipeResource
@@ -290,7 +294,7 @@ class CommentResource(ModelResource):
     class Meta:
         queryset = ThreadedComment.objects.visible()
         resource_name = "comments"
-        fields = ['id', 'comment', 'submit_date', 'user_name', 'user_email', 'user_url', 'replied_to',]
+        fields = ['id', 'object_pk', 'comment', 'submit_date', 'user_name', 'user_email', 'user_url', 'replied_to',]
         list_allowed_methods = ['get', 'post',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
@@ -320,7 +324,7 @@ class RatingResource(ModelResource):
     class Meta:
         queryset = Rating.objects.all()
         resource_name = "rating"
-        fields = ['id', 'value',]
+        fields = ['id', 'object_pk', 'value',]
         list_allowed_methods = ['get', 'post',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
@@ -366,7 +370,7 @@ class AssignedKeywordResource(ModelResource):
     class Meta:
         queryset = AssignedKeyword.objects.all()
         resource_name = "assigned_keywords"
-        fields = ['id', '_order',]
+        fields = ['id', 'object_pk', '_order',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         cache = SimpleCache()
@@ -472,3 +476,4 @@ class RestPeriodResource(ModelResource):
         return RestPeriod.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
                                          Q(recipe__expiry_date__gte=now()) | Q(recipe__expiry_date__isnull=True),
                                          Q(recipe__status=CONTENT_STATUS_PUBLISHED))
+
