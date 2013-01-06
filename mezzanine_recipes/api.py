@@ -15,7 +15,6 @@ from mezzanine.utils.timezone import now
 
 from tastypie import fields
 from tastypie.resources import ModelResource
-from tastypie.cache import SimpleCache
 from tastypie.throttle import CacheDBThrottle
 from tastypie.utils import trailing_slash
 from tastypie.serializers import Serializer
@@ -84,7 +83,7 @@ class CamelCaseJSONSerializer(Serializer):
 
 
 class CategoryResource(ModelResource):
-    recipes = fields.ToManyField('mezzanine_recipes.api.RecipeResource', 'blogposts')
+    posts = fields.ToManyField('mezzanine_recipes.api.PostResource', 'blogposts')
 
     class Meta:
         queryset = BlogCategory.objects.all()
@@ -93,7 +92,6 @@ class CategoryResource(ModelResource):
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         limit = 0
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
@@ -104,18 +102,27 @@ class CategoryResource(ModelResource):
                                            Q(blogposts__expiry_date__gte=now()) | Q(blogposts__expiry_date__isnull=True),
                                            Q(blogposts__status=CONTENT_STATUS_PUBLISHED)).distinct()
 
+    def alter_list_data_to_serialize(self, request, data):
+        data['categories'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['categories']
+        del data['categories']
+        return data
+
 
 
 class BlogPostResource(ModelResource):
     categories = fields.ToManyField('mezzanine_recipes.api.CategoryResource', 'categories', full=True)
 
     class Meta:
-        queryset = BlogPost.objects.published().order_by('-publish_date')
+        queryset = BlogPost.secondary.published().order_by('-publish_date')
         resource_name = "blog"
         fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count', 'modified_date',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             "publish_date": ('gt',),
@@ -129,6 +136,16 @@ class BlogPostResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
             ]
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['blogs'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['blogs']
+        del data['blogs']
+        return data
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -166,12 +183,11 @@ class RecipeResource(ModelResource):
     rest_period = fields.ToOneField('mezzanine_recipes.api.RestPeriodResource', 'rest_period', full=True, null=True)
 
     class Meta:
-        queryset = Recipe.objects.published().order_by('-publish_date')
+        queryset = Recipe.secondary.published().order_by('-publish_date')
         resource_name = "recipe"
         fields = ['id', 'title', 'featured_image', 'summary', 'description', 'portions', 'difficulty', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count', 'modified_date',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             "publish_date": ('gt',),
@@ -191,6 +207,16 @@ class RecipeResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
             ]
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['recipes'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['recipes']
+        del data['recipes']
+        return data
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -229,7 +255,6 @@ class PostResource(ModelResource):
         fields = ['id', 'title', 'featured_image', 'description', 'publish_date', 'allow_comments', 'comments_count', 'rating_average', 'rating_count', 'modified_date',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             "publish_date": ('gt',),
@@ -254,6 +279,16 @@ class PostResource(ModelResource):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
         ]
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['posts'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['posts']
+        del data['posts']
+        return data
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
@@ -297,7 +332,6 @@ class CommentResource(ModelResource):
         fields = ['id', 'object_pk', 'comment', 'submit_date', 'user_name', 'user_email', 'user_url', 'replied_to',]
         list_allowed_methods = ['get', 'post',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             'object_pk': ('exact',),
@@ -311,6 +345,16 @@ class CommentResource(ModelResource):
 
     def dehydrate_user_url(self, bundle):
         return None
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['comments'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['comments']
+        del data['comments']
+        return data
 
 
 
@@ -327,7 +371,6 @@ class RatingResource(ModelResource):
         fields = ['id', 'object_pk', 'value',]
         list_allowed_methods = ['get', 'post',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             'object_pk': ('exact',),
@@ -335,6 +378,16 @@ class RatingResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
         authorization = DjangoAuthorization()
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['ratings'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['ratings']
+        del data['ratings']
+        return data
 
 
 
@@ -348,7 +401,6 @@ class KeywordResource(ModelResource):
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         limit = 0
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             'title': ('exact',),
@@ -356,6 +408,16 @@ class KeywordResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
         authorization = ReadOnlyAuthorization()
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['keywords'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['keywords']
+        del data['keywords']
+        return data
 
 
 
@@ -373,7 +435,6 @@ class AssignedKeywordResource(ModelResource):
         fields = ['id', 'object_pk', '_order',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         filtering = {
             'object_pk': ('exact',),
@@ -381,6 +442,16 @@ class AssignedKeywordResource(ModelResource):
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
         authorization = ReadOnlyAuthorization()
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['assignedKeywords'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['assignedKeywords']
+        del data['assignedKeywords']
+        return data
 
 
 
@@ -394,7 +465,6 @@ class IngredientResource(ModelResource):
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
         limit = 0
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
@@ -411,6 +481,16 @@ class IngredientResource(ModelResource):
         else:
             return None
 
+    def alter_list_data_to_serialize(self, request, data):
+        data['ingredients'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['ingredients']
+        del data['ingredients']
+        return data
+
 
 
 class WorkingHoursResource(ModelResource):
@@ -422,7 +502,6 @@ class WorkingHoursResource(ModelResource):
         fields = ['id', 'hours', 'minutes',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
@@ -432,6 +511,16 @@ class WorkingHoursResource(ModelResource):
         return WorkingHours.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
                                            Q(recipe__expiry_date__gte=now()) | Q(recipe__expiry_date__isnull=True),
                                            Q(recipe__status=CONTENT_STATUS_PUBLISHED))
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['workingHours'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['workingHours']
+        del data['workingHours']
+        return data
 
 
 
@@ -444,7 +533,6 @@ class CookingTimeResource(ModelResource):
         fields = ['id', 'hours', 'minutes',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
@@ -454,6 +542,16 @@ class CookingTimeResource(ModelResource):
         return CookingTime.objects.filter(Q(recipe__publish_date__lte=now()) | Q(recipe__publish_date__isnull=True),
                                           Q(recipe__expiry_date__gte=now()) | Q(recipe__expiry_date__isnull=True),
                                           Q(recipe__status=CONTENT_STATUS_PUBLISHED))
+
+    def alter_list_data_to_serialize(self, request, data):
+        data['cookingTimes'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['cookingTimes']
+        del data['cookingTimes']
+        return data
 
 
 
@@ -466,7 +564,6 @@ class RestPeriodResource(ModelResource):
         fields = ['id', 'days', 'hours', 'minutes',]
         list_allowed_methods = ['get',]
         detail_allowed_methods = ['get',]
-        cache = SimpleCache()
         throttle = CacheDBThrottle()
         serializer = CamelCaseJSONSerializer()
         authentication = ApiKeyAuthentication()
@@ -477,3 +574,12 @@ class RestPeriodResource(ModelResource):
                                          Q(recipe__expiry_date__gte=now()) | Q(recipe__expiry_date__isnull=True),
                                          Q(recipe__status=CONTENT_STATUS_PUBLISHED))
 
+    def alter_list_data_to_serialize(self, request, data):
+        data['restPeriods'] = data['objects']
+        del data['objects']
+        return data
+
+    def alter_deserialized_list_data(self, request, data):
+        data['objects'] = data['restPeriods']
+        del data['restPeriods']
+        return data
