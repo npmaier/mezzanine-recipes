@@ -21,7 +21,7 @@ from .models import BlogProxy, BlogPost, Recipe
 def blog_post_list_article(request, model=BlogPost, tag=None, year=None, month=None, username=None, category=None, template="blog/blog_post_list.html"):
     return blog_post_list(request=request, model=model, tag=tag, year=year, month=month, username=username, category=category, template=template)
 
-def blog_post_list_recipe(request, model=Recipe, tag=None, year=None, month=None, username=None, category=None, template="blog/blog_post_list.html"):
+def blog_post_list_recipe(request, model=Recipe, tag=None, year=None, month=None, username=None, category=None, template="recipe/recipe_list.html"):
     return blog_post_list(request=request, model=model, tag=tag, year=year, month=month, username=username, category=category, template=template)
 
 
