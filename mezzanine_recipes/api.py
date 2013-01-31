@@ -7,7 +7,7 @@ from django.db.models import Q
 from django.http import Http404
 from django.utils import simplejson
 
-
+from mezzanine.conf import settings
 from mezzanine.generic.models import ThreadedComment, AssignedKeyword, Keyword, Rating
 from mezzanine.blog.models import BlogCategory
 from mezzanine.core.models import CONTENT_STATUS_PUBLISHED
@@ -30,7 +30,7 @@ class CamelCaseJSONSerializer(Serializer):
     formats = ['json']
     content_types = {
         'json': 'application/json',
-        }
+    }
 
     def to_json(self, data, options=None):
         # Changes underscore_separated names to camelCase names to go from python convention to javacsript convention
@@ -132,6 +132,12 @@ class BlogPostResource(ModelResource):
         authorization = ReadOnlyAuthorization()
         limit = 5
 
+    def dehydrate_featured_image(self, bundle):
+        if bundle.data['featured_image']:
+            return settings.MEDIA_URL+bundle.data['featured_image']
+        else:
+            return None
+
     def override_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
@@ -196,6 +202,12 @@ class RecipeResource(ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = ReadOnlyAuthorization()
         limit = 5
+
+    def dehydrate_featured_image(self, bundle):
+        if bundle.data['featured_image']:
+            return settings.MEDIA_URL+bundle.data['featured_image']
+        else:
+            return None
 
     def dehydrate_difficulty(self, bundle):
         if bundle.data['difficulty']:
@@ -263,6 +275,12 @@ class PostResource(ModelResource):
         authentication = ApiKeyAuthentication()
         authorization = ReadOnlyAuthorization()
         limit = 5
+
+    def dehydrate_featured_image(self, bundle):
+        if bundle.data['featured_image']:
+            return settings.MEDIA_URL+bundle.data['featured_image']
+        else:
+            return None
 
     def dehydrate(self, bundle):
         if isinstance(bundle.obj, BlogPost):
