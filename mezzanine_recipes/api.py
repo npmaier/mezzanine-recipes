@@ -138,10 +138,10 @@ class BlogPostResource(ModelResource):
         else:
             return None
 
-    def override_urls(self):
+    def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
-            ]
+        ]
 
     def alter_list_data_to_serialize(self, request, data):
         data['blogs'] = data['objects']
@@ -215,10 +215,10 @@ class RecipeResource(ModelResource):
         else:
             return None
 
-    def override_urls(self):
+    def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
-            ]
+        ]
 
     def alter_list_data_to_serialize(self, request, data):
         data['recipes'] = data['objects']
@@ -293,7 +293,7 @@ class PostResource(ModelResource):
             bundle.data = recipe_res.full_dehydrate(br_bundle).data
         return bundle
 
-    def override_urls(self):
+    def prepend_urls(self):
         return [
             url(r"^(?P<resource_name>%s)/search%s$" % (self._meta.resource_name, trailing_slash()), self.wrap_view('get_search'), name="api_get_search"),
         ]
