@@ -155,6 +155,7 @@ class BlogPostResource(ModelResource):
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
         self.throttle_check(request)
 
         sqs = BlogPost.objects.search(request.GET.get('q', ''))
@@ -232,6 +233,7 @@ class RecipeResource(ModelResource):
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
         self.throttle_check(request)
 
         sqs = Recipe.objects.search(request.GET.get('q', ''))
@@ -310,6 +312,7 @@ class PostResource(ModelResource):
 
     def get_search(self, request, **kwargs):
         self.method_check(request, allowed=['get'])
+        self.is_authenticated(request)
         self.throttle_check(request)
 
         sqs = BlogProxy.secondary.search(request.GET.get('q', ''))
