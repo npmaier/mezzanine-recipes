@@ -46,6 +46,7 @@ Installation
         ("^%s/" % settings.BLOG_SLUG, include("mezzanine_recipes.urls")),
         ...
 
+Be sure to place these urlpatterns at the top of the section.  Of course, don't place them below 'mezzanine.urls' as the documentation directs.
 * Look at http://www.robertstevens.org/mezzanine-recipes.html if you need a much more detailed installation instruction
   
 
